@@ -23,3 +23,5 @@ testSock = socket.socket(socket.AF_ALG, socket.SOCK_SEQPACKET, 0)
 #print(testSock) #test numerical inputs
 
 #print(dec('0800010000000010'+'0'*64))
+
+print(socket.ALG_OP_DECRYPT)

