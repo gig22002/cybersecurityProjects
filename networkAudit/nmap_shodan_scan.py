@@ -1,7 +1,8 @@
 #!/bin/python3
 
-import sys
-import shodan
+import sys, os
+from dotenv import load_dotenv
+from shodan import Shodan
 import requests
 import xml.etree.ElementTree as et
 
@@ -126,8 +127,16 @@ def XMLParse(path):
     except Exception as x:
         sys.exit("Encountered exception " + str(x))
 
+def shodanScan():
+
+    load_dotenv()
+    key = os.getenv("SHODAN_KEY")
+    print(key)
+
 if __name__ == "__main__":
     if (len(sys.argv) != 2 or sys.argv[1][-3:] != "xml"): #require nmap scan in xml format
         sys.exit("Usage: python3 nmap_shodan_scan.py path/to/nmapscan.xml")
 
     nmapResults = XMLParse(sys.argv[1])
+    shodanScan()
+    #print(nmapResults[1].ports[0])
