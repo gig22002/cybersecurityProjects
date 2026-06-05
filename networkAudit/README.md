@@ -10,13 +10,15 @@ Create a `.env` file in this directory containing your Shodan API key in the for
 
 Install the required libraries with `pip install -r requirements.txt`.
 
-Run `python3 nmap_shodan_scan.py -f path/to/nmapscan.xml`.
+Run `python3 threaded_nmap_shodan_scan.py -f path/to/nmapscan.xml`.
 
 This program iterates through each IP detected by Nmap, collecting hostnames, exposed ports, and their respective services.
 Then, using the IPs returned by Nmap, queries Shodan.io's API to attempt to find posts exposed externally to the internet.
 This data is outputted as a .csv file with the columns of IP, Hostname, Internal Port (detected by nmap), Service, and External Port (detected by Shodan), with an entry for each individual port.
 
 Optionally, you can include the `-v` flag before the `-f` flag for verbose output.
+
+The multithreaded version is over 500% faster than the sequential version.
 
 ## Nmap
 
