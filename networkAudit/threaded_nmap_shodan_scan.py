@@ -60,6 +60,13 @@ class IPObj:
 
         return outer
 
+    def getPorts(self):
+        ''' Return array of held portids '''
+        ports = []
+        for port in self.ports: ports.append(str(port.portid))
+
+        return ports
+
 class PortObj:
     '''
     Class to store port information
@@ -260,8 +267,21 @@ def Export(path, nmapResults, shodanResults):
             l.append("")
             #detect if port is external
             if (ip[0] in shodanResults):
-                for _port in shodanResults[ip[0]].ports:
-                    if (str(ip[2]) == str(_port.portid)):
+                #detect if port is disjoint i.e. exposed externally but not internally
+                for p in shodanResults[ip[0]].getPorts():
+                    if p not in _obj.getPorts():
+                        print(f"{ip[0]} exposed to Shodan but not detected by Nmap")
+                        #create new (unique) entry with null nmap values
+                        #fixDisjoint = l
+                        #fixDisjoint[2] = None
+                        #fixDisjoint[3] = None
+                        #fixDisjoint[-1] = p
+                        #if(fixDisjoint != array[-1]): #dedup
+                        #    array.append(fixDisjoint)
+
+                #external exposure detection
+                for _port in shodanResults[ip[0]].getPorts():
+                    if (str(ip[2]) == str(_port)):
                         l[-1] = ip[2]
 
             array.append(l)
