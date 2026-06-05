@@ -91,7 +91,7 @@ class PortObj:
         ''' Return array of all attributes '''
         return [self.portid, self.protocol, self.service]
 
-def XMLParse(path):
+def XMLParse(path, verbose=False):
     '''
     Parses nmap scan xml based on the path provided by args.
 
@@ -119,7 +119,11 @@ def XMLParse(path):
             ip = host.find("address").get("addr")
 
             #parse hostname
-            hostname = host.find("hostnames").find("hostname").get("name")
+            try:
+                hostname = host.find("hostnames").find("hostname").get("name")
+            except:
+                hostname = ""
+                if (verbose): print("Failed to find hostname.")
 
             #parse port info
             portList = []
@@ -144,7 +148,7 @@ def XMLParse(path):
         return ips, ipList
 
     except Exception as x:
-        sys.exit("Encountered exception in Nmap parse " + str(x))
+        sys.exit("Encountered fatal exception in Nmap parse: " + str(x))
 
 def ShodanScan(ipList, verbose=False):
     '''
@@ -186,7 +190,7 @@ def ShodanScan(ipList, verbose=False):
             ips[ip] = _IPObj
 
         except Exception as x:
-            if(verbose): print("Encountered exception in Shodan search " + str(x))
+            if(verbose): print("Encountered exception in Shodan search: " + str(x))
 
     print("[!] Shodan results parsed.")
     return ips
@@ -223,8 +227,8 @@ def Export(path, nmapResults, shodanResults):
                 for _port in shodanResults[ip[0]].ports:
                     if (str(ip[2]) == str(_port.portid)):
                         l.append(ip[2])
-                    else: l.append(0)
-            else: l.append(0)
+                    else: l.append("")
+            else: l.append("")
 
             array.append(l)
 
@@ -263,7 +267,7 @@ if __name__ == "__main__":
     if path == None:
         sys.exit("Usage: python3 nmap_shodan_scan.py -f path/to/nmapscan.xml")
 
-    nmapResults = XMLParse(str(path))
+    nmapResults = XMLParse(str(path), verbose)
 
     shodanResults = ShodanScan(nmapResults[1], verbose)
 
