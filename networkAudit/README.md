@@ -1,5 +1,9 @@
 # Nmap and Shodan.io Auditing Tool
 
+## Overview
+
+This is a command line tool intended to transform an .xml output of an Nmap scan in conjunction with paired data from Shodan.io to discover internal and external port exposures on a network.
+
 ## Usage
 
 Create a `.env` file in this directory containing your Shodan API key in the format of `SHODAN_KEY=[yourKeyHere]`.
@@ -20,4 +24,4 @@ For my scans, I used the following command:
 
 `-T4` to speed up the scan, `-Pn` to treat all hosts as online (circumvents blocked discovery probes), `--open` to only output open ports (required for this program), `-oX output.xml` to output to xml (required for this program), and finally the IP range to scan.
 
-##### Created by Gio Girasoli for UConn ITS 06/05/25
+###### Created by Gio Girasoli for UConn ITS 06/05/25
