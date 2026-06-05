@@ -108,7 +108,7 @@ def XMLParse(path):
         #create xml tree object
         tree = et.parse(path)
         root = tree.getroot()
-
+        
         print(f"=== Parsing {root.get("args")} ===")
 
         #iterate through each scanned host
@@ -208,11 +208,18 @@ def Export(path, nmapResults, shodanResults):
           description: The IPObjs returned from the Shodan scan of the nmap IPs
     '''
     
+    #create initial array
     array = []
     for _obj in nmapResults:
+        #make two dimensional per port per IPObj
         for ip in _obj.arr():
-            print(ip)
-            array.append(ip)
+            l = ip
+            if (ip[0] in shodanResults):
+                for _port in shodanResults[ip[0]].ports:
+                    if (str(ip[2]) == str(_port.portid)):
+                        l.append(ip[2])
+
+            array.append(l)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -235,6 +242,8 @@ if __name__ == "__main__":
 
     nmapResults = XMLParse(str(path))
     print("[!] Nmap results parsed.")
-    Export("./out.csv", nmapResults[0], None)
+    shodanResults = {"137.99.146.200": IPObj("137.99.146.200", [PortObj(80, None, None)], None)}
+    Export("./out.csv", nmapResults[0], shodanResults)
     shodanResults = shodanScan(nmapResults[1], verbose)
     print("[!] Shodan results parsed.")
+
