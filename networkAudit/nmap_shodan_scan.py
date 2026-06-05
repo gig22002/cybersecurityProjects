@@ -3,7 +3,6 @@
 import getopt, sys, os
 from dotenv import load_dotenv
 from shodan import Shodan
-import requests
 import xml.etree.ElementTree as et
 
 class IPObj:
@@ -86,7 +85,7 @@ def XMLParse(path):
     Parses nmap scan xml based on the path provided by args.
 
     Assumes at least
-    nmap --open: i.e. only open ports are stored 
+    nmap --open -oX: i.e. only open ports are stored
 
     parameters:
         - name: path
@@ -151,6 +150,9 @@ def shodanScan(ipList, verbose=False):
     api = Shodan(key)
 
     #get results from search
+    #note: this scans only the ips returned from the nmap search.
+    #      thus, I am making the (logical) assumption the externally exposed ips
+    #      are a subset of the internally exposed ips.
     ips = []
     for _ip in ipList:
         if(verbose): print(f"Querying {_ip}...")
@@ -199,3 +201,5 @@ if __name__ == "__main__":
     print("[!] Nmap results parsed.")
     shodanResults = shodanScan(nmapResults[1], verbose)
     print("[!] Shodan results parsed.")
+
+
