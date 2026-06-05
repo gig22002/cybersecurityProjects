@@ -24,4 +24,4 @@ For my scans, I used the following command:
 
 `-T4` to speed up the scan, `-Pn` to treat all hosts as online (circumvents blocked discovery probes), `--open` to only output open ports (required for this program), `-oX output.xml` to output to xml (required for this program), and finally the IP range to scan.
 
-###### Created by Gio Girasoli for UConn ITS 06/05/25
+###### Created by Gio Girasoli for UConn ITS 06/05/26
