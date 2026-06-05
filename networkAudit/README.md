@@ -8,6 +8,8 @@ This is a command line tool intended to transform an xml output of an Nmap scan 
 
 Create a `.env` file in this directory containing your Shodan API key in the format of `SHODAN_KEY=[yourKeyHere]`.
 
+Install the required libraries with `pip install -r requirements.txt`.
+
 Run `python3 nmap_shodan_scan.py -f path/to/nmapscan.xml`.
 
 This program iterates through each IP detected by Nmap, collecting hostnames, exposed ports, and their respective services.
