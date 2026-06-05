@@ -4,6 +4,8 @@ import getopt, sys, os
 from dotenv import load_dotenv
 from shodan import Shodan
 import xml.etree.ElementTree as et
+import numpy as np
+import pandas as pd
 
 class IPObj:
     '''
@@ -177,6 +179,26 @@ def shodanScan(ipList, verbose=False):
             if(verbose): print("Encountered exception in Shodan search " + str(x))
 
     return ips
+
+def Export(path, nmapResults, shodanResults):
+    '''
+    Coalesces and exports scan results to a .csv file using numpy.
+
+    parameters:
+        - name: path
+          type: string
+          example: /path/to/output.csv
+          description: The file path to output results into
+
+        - name: nmapResults
+          type: array of IPObjs
+          description: The IPObjs returned from parsing the nmap scan .xml
+
+        - name: shodanResults
+          type: array of IPObjs
+          description: The IPObjs returned from the Shodan scan of the nmap IPs
+    '''
+    pass
 
 if __name__ == "__main__":
     args = sys.argv[1:]
