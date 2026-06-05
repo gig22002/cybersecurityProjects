@@ -218,8 +218,12 @@ def Export(path, nmapResults, shodanResults):
                 for _port in shodanResults[ip[0]].ports:
                     if (str(ip[2]) == str(_port.portid)):
                         l.append(ip[2])
+                    else: l.append(0)
+            else: l.append(0)
 
             array.append(l)
+
+    npObj = np.array(array)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
