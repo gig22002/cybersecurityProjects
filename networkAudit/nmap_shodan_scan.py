@@ -53,7 +53,6 @@ class IPObj:
             inner = [self.ip]
             inner.append(self.hostname)
             inner.append(port.portid)
-            inner.append(port.protocol)
             inner.append(port.service)
 
             outer.append(inner)
@@ -237,7 +236,6 @@ def Export(path, nmapResults, shodanResults):
         "IP",
         "Hostname",
         "Internal Port",
-        "Protocol",
         "Service",
         "External (Internet) Port"])
     try:
