@@ -103,6 +103,11 @@ def XMLParse(path, verbose=False):
           type: string
           example: /path/to/scan.xml
           description: The file path to the desired .xml nmap scan
+
+        - name: verbose
+          type: bool
+          example: False
+          description: Option to enable verbose stdout
     '''
     try:
         #create xml tree object
@@ -180,17 +185,21 @@ def ScanHost(api, _ip):
     #generate ip object
     _IPObj = IPObj(ip, ports, hostname)
     return _IPObj
-    #ips[ip] = _IPObj
 
 def ShodanScan(ipList, verbose=False):
     '''
     Use Shodan.io API to find externally exposed IPs
 
     parameters:
-        - name: CIDR
-          type: string 
-          example: 137.99.0.0/16
-          description: IP addr in CIDR notation where subnet is 0
+        - name: ipList
+          type: array of strings 
+          description: Nmap's list of IPs to enumerate via Shodan
+
+        - name: verbose
+          type: bool
+          example: False
+          description: Option to enable verbose stdout
+
     '''
     #load and use Shodan api key from .env
     load_dotenv()
@@ -203,11 +212,14 @@ def ShodanScan(ipList, verbose=False):
     #      are a subset of the internally exposed ips.
     ips = dict()
 
+    #create and collect threads to gather output
     processes = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=None) as e:
+        #create a thread for each ip
         for _ip in ipList:
             processes.append(e.submit(ScanHost, api, _ip))
 
+        #collect results
         for _f in concurrent.futures.as_completed(processes):
             try:
                 ips[_f.result().ip] = _f.result()

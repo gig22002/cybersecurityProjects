@@ -102,6 +102,11 @@ def XMLParse(path, verbose=False):
           type: string
           example: /path/to/scan.xml
           description: The file path to the desired .xml nmap scan
+          
+        - name: verbose
+          type: bool
+          example: False
+          description: Option to enable verbose stdout
     '''
     try:
         #create xml tree object
@@ -154,10 +159,14 @@ def ShodanScan(ipList, verbose=False):
     Use Shodan.io API to find externally exposed IPs
 
     parameters:
-        - name: CIDR
-          type: string 
-          example: 137.99.0.0/16
-          description: IP addr in CIDR notation where subnet is 0
+        - name: ipList
+          type: array of strings
+          description: Nmap's list of IPs to enumerate via Shodan
+
+        - name: verbose
+          type: bool
+          example: False
+          description: Option to enable verbose stdout
     '''
     #load and use Shodan api key from .env
     load_dotenv()
