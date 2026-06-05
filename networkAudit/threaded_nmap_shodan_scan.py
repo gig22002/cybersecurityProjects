@@ -1,7 +1,7 @@
 #!/bin/python3
 
 import getopt, sys, os
-from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 from dotenv import load_dotenv
 from shodan import Shodan
 import xml.etree.ElementTree as et
@@ -202,13 +202,18 @@ def ShodanScan(ipList, verbose=False):
     #      thus, I am making the (logical) assumption the externally exposed ips
     #      are a subset of the internally exposed ips.
     ips = dict()
-    for _ip in ipList:
-        if(verbose): print(f"Querying {_ip}...")
-        try:
-            ips[_ip] = ScanHost(api, _ip)
 
-        except Exception as x:
-            if(verbose): print("Encountered exception in Shodan search: " + str(x))
+    processes = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=None) as e:
+        for _ip in ipList:
+            processes.append(e.submit(ScanHost, api, _ip))
+
+        for _f in concurrent.futures.as_completed(processes):
+            try:
+                ips[_f.result().ip] = _f.result()
+            
+            except Exception as x:
+                if(verbose): print("Encountered exception in Shodan search: " + str(x))
 
     print("[!] Shodan results parsed.")
     return ips
