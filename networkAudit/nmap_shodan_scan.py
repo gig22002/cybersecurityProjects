@@ -38,22 +38,27 @@ class IPObj:
 
         return outStr
 
-    def info(self):
+    def arr(self):
         '''
-        Returns dictionary of held attributes
-
+        Output as numpy-compatible array
+        
         Format:
-        {
-            str(ip):
-            [[PortObj, PortObj, ...],
-            str(hostname)]
-        }
+        [ip, hostname, portid, protocol, service]
+        for each port
         '''
-        infoDict = {
-            self.ip: [self.ports, self.hostname]
-        }
+        outer = []
 
-        return infoDict
+        #separate ip entry for each port
+        for port in self.ports:
+            inner = [self.ip]
+            inner.append(self.hostname)
+            inner.append(port.portid)
+            inner.append(port.protocol)
+            inner.append(port.service)
+
+            outer.append(inner)
+
+        return outer
 
 class PortObj:
     '''
@@ -81,6 +86,10 @@ class PortObj:
     def __str__(self):
         ''' Return string of all attributes '''
         return f"{self.portid}, {self.protocol}, {self.service}"
+
+    def arr(self):
+        ''' Return array of all attributes '''
+        return [self.portid, self.protocol, self.service]
 
 def XMLParse(path):
     '''
@@ -155,7 +164,7 @@ def shodanScan(ipList, verbose=False):
     #note: this scans only the ips returned from the nmap search.
     #      thus, I am making the (logical) assumption the externally exposed ips
     #      are a subset of the internally exposed ips.
-    ips = []
+    ips = dict()
     for _ip in ipList:
         if(verbose): print(f"Querying {_ip}...")
         try:
@@ -173,7 +182,7 @@ def shodanScan(ipList, verbose=False):
 
             #generate ip object
             _IPObj = IPObj(ip, ports, hostname)
-            ips.append(_IPObj)
+            ips[ip] = _IPObj
 
         except Exception as x:
             if(verbose): print("Encountered exception in Shodan search " + str(x))
@@ -198,7 +207,12 @@ def Export(path, nmapResults, shodanResults):
           type: array of IPObjs
           description: The IPObjs returned from the Shodan scan of the nmap IPs
     '''
-    pass
+    
+    array = []
+    for _obj in nmapResults:
+        for ip in _obj.arr():
+            print(ip)
+            array.append(ip)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -221,7 +235,6 @@ if __name__ == "__main__":
 
     nmapResults = XMLParse(str(path))
     print("[!] Nmap results parsed.")
+    Export("./out.csv", nmapResults[0], None)
     shodanResults = shodanScan(nmapResults[1], verbose)
     print("[!] Shodan results parsed.")
-
-
