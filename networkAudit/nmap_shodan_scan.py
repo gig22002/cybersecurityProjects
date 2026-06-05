@@ -1,6 +1,7 @@
 #!/bin/python3
 
 import sys, os
+import ipaddress
 from dotenv import load_dotenv
 from shodan import Shodan
 import requests
@@ -87,6 +88,12 @@ def XMLParse(path):
 
     Assumes at least
     nmap --open: i.e. only open ports are stored 
+
+    parameters:
+        - name: path
+          type: string
+          example: /path/to/scan.xml
+          description: The file path to the desired .xml nmap scan
     '''
     #hostdict = 
 
@@ -125,18 +132,35 @@ def XMLParse(path):
         return ips
 
     except Exception as x:
-        sys.exit("Encountered exception " + str(x))
+        sys.exit("Encountered exception in nmap parse " + str(x))
 
-def shodanScan():
+def shodanScan(CIDR):
+    '''
+    Use Shodan.io API to find externally exposed IPs
 
+    parameters:
+        - name: CIDR
+          type: string 
+          example: 137.99.0.0/16
+          description: IP addr in CIDR notation where subnet is 0
+    '''
+    #load and use Shodan api key from .env
     load_dotenv()
     key = os.getenv("SHODAN_KEY")
-    print(key)
+    api = Shodan(key)
+
+    #parse IPs from CIDR input
+    ips = [str(ip) for ip in ipaddress.IPv4Network(CIDR)]
+
+    try:
+        #get results from search
+
+    except Exception as x:
+        sys.exit("Encountered exception in Shodan search " + str(x))
 
 if __name__ == "__main__":
-    if (len(sys.argv) != 2 or sys.argv[1][-3:] != "xml"): #require nmap scan in xml format
-        sys.exit("Usage: python3 nmap_shodan_scan.py path/to/nmapscan.xml")
+    if (len(sys.argv) < 3 or sys.argv[1][-3:] != "xml"): #require nmap scan in xml format
+        sys.exit("Usage: python3 nmap_shodan_scan.py path/to/nmapscan.xml ip.in.CIDR.0/notation")
 
-    nmapResults = XMLParse(sys.argv[1])
-    shodanScan()
-    #print(nmapResults[1].ports[0])
+    nmapResults = XMLParse(str(sys.argv[1]))
+    shodanScan("137.99.146.0/24")
