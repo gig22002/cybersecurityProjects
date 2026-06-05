@@ -122,7 +122,7 @@ def XMLParse(path, verbose=False):
                 hostname = host.find("hostnames").find("hostname").get("name")
             except:
                 hostname = ""
-                if (verbose): print("Failed to find hostname.")
+                if (verbose): print(f"Failed to find hostname for {ip}.")
 
             #parse port info
             portList = []
@@ -230,7 +230,7 @@ def Export(path, nmapResults, shodanResults):
 
             array.append(l)
 
-    #convert to dataframe
+    #convert to dataframe and export
     npObj = np.array(array)
     df = pd.DataFrame(npObj, columns=[
         "IP",
@@ -244,13 +244,31 @@ def Export(path, nmapResults, shodanResults):
     except:
         print(f"Failed to export data to {path}")
 
+def GetOutputHelper(path):
+    '''
+    Helper function to get the filename to output to
+
+    parameters:
+        - name: path
+          type: string
+          example: path/to/nmapscan.xml
+          description: The path to the nmap scan obtained by arguments
+    '''
+
+    #split by slash
+    arr = path.split('/')
+
+    fname = arr[-1]
+    fname = "out-"+fname[:-3]+"csv"
+
+    return fname
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     options = "vf:"
     longOpts = ["verbose", "file="]
     verbose = False
     path = None
-    outPath = "./out.csv"
 
     try:
         arguments, vals = getopt.getopt(args, options, longOpts)
@@ -259,6 +277,8 @@ if __name__ == "__main__":
                 verbose = True
             elif _arg in ("-f", "--file"):
                 path = _val
+                outPath = GetOutputHelper(path)
+
     except:
         sys.exit("Usage: python3 nmap_shodan_scan.py -f path/to/nmapscan.xml")
     if path == None:
