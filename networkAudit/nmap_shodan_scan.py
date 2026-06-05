@@ -1,7 +1,6 @@
 #!/bin/python3
 
 import sys, os
-import ipaddress
 from dotenv import load_dotenv
 from shodan import Shodan
 import requests
@@ -103,7 +102,8 @@ def XMLParse(path):
         root = tree.getroot()
 
         #iterate through each scanned host
-        ips = []
+        ips = [] #scanned IP objects
+        iplist = [] #list of contained IPs for Shodan
         for host in root.findall('host'):
             #parse ip addr
             ip = host.find('address').get('addr')
@@ -128,13 +128,14 @@ def XMLParse(path):
             #create ip object and append to array
             _IPObj = IPObj(ip, portList, hostname)
             ips.append(_IPObj)
+            iplist.append(ip)
 
-        return ips
+        return ips, iplist
 
     except Exception as x:
         sys.exit("Encountered exception in nmap parse " + str(x))
 
-def shodanScan(CIDR):
+def shodanScan(ips):
     '''
     Use Shodan.io API to find externally exposed IPs
 
@@ -149,18 +150,24 @@ def shodanScan(CIDR):
     key = os.getenv("SHODAN_KEY")
     api = Shodan(key)
 
-    #parse IPs from CIDR input
-    ips = [str(ip) for ip in ipaddress.IPv4Network(CIDR)]
+    #get results from search
+    for _ip in ips:
+        print(_ip)
+        try:
+            host = api.host(_ip)
+            ip = host["ip_str"]
+            
+            ports = []
+            for item in host["data"]:
+                ports.append(item['port'])
+            print(ports)
 
-    try:
-        #get results from search
-
-    except Exception as x:
-        sys.exit("Encountered exception in Shodan search " + str(x))
+        except Exception as x:
+            print("Encountered exception in Shodan search " + str(x))
 
 if __name__ == "__main__":
-    if (len(sys.argv) < 3 or sys.argv[1][-3:] != "xml"): #require nmap scan in xml format
-        sys.exit("Usage: python3 nmap_shodan_scan.py path/to/nmapscan.xml ip.in.CIDR.0/notation")
+    if (len(sys.argv) < 2 or sys.argv[1][-3:] != "xml"): #require nmap scan in xml format
+        sys.exit("Usage: python3 nmap_shodan_scan.py path/to/nmapscan.xml")
 
     nmapResults = XMLParse(str(sys.argv[1]))
-    shodanScan("137.99.146.0/24")
+    shodanScan(nmapResults[1])
