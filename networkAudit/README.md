@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a command line tool intended to transform an .xml output of an Nmap scan in conjunction with paired data from Shodan.io to discover internal and external port exposures on a network.
+This is a command line tool intended to transform an xml output of an Nmap scan in conjunction with paired data from Shodan.io to discover internal and external port exposures on a network.
 
 ## Usage
 
