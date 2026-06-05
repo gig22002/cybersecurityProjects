@@ -28,6 +28,7 @@ class IPObj:
         self.hostname = hostname
 
     def __str__(self):
+        ''' Return string of all attributes '''
         outStr = f"{self.ip}, ["
         for port in self.ports:
             outStr += f"{port}; "
@@ -37,6 +38,8 @@ class IPObj:
 
     def info(self):
         '''
+        Returns dictionary of held attributes
+
         Format:
         {
             str(ip):
@@ -74,6 +77,7 @@ class PortObj:
         self.service = service
 
     def __str__(self):
+        ''' Return string of all attributes '''
         return f"{self.portid}, {self.protocol}, {self.service}"
 
 def XMLParse(path):
@@ -81,14 +85,16 @@ def XMLParse(path):
     Parses nmap scan xml based on the path provided by args.
 
     Assumes at least
-    nmap --open 
+    nmap --open: i.e. only open ports are stored 
     '''
     #hostdict = 
 
     try:
+        #create xml tree object
         tree = et.parse(path)
         root = tree.getroot()
 
+        #iterate through each scanned host
         ips = []
         for host in root.findall('host'):
             #parse ip addr
@@ -107,11 +113,15 @@ def XMLParse(path):
                 if serviceField is not None:
                     service = serviceField.get('name')
                 
+                #create port object and append to array
                 _PortObj = PortObj(portid, protocol, service)
                 portList.append(_PortObj)
 
+            #create ip object and append to array
             _IPObj = IPObj(ip, portList, hostname)
             ips.append(_IPObj)
+
+        return ips
 
     except Exception as x:
         sys.exit("Encountered exception " + str(x))
