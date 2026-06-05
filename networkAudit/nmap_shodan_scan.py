@@ -103,7 +103,7 @@ def XMLParse(path):
 
         #iterate through each scanned host
         ips = [] #scanned IP objects
-        iplist = [] #list of contained IPs for Shodan
+        ipList = [] #list of contained IPs for Shodan
         for host in root.findall('host'):
             #parse ip addr
             ip = host.find('address').get('addr')
@@ -128,14 +128,14 @@ def XMLParse(path):
             #create ip object and append to array
             _IPObj = IPObj(ip, portList, hostname)
             ips.append(_IPObj)
-            iplist.append(ip)
+            ipList.append(ip)
 
-        return ips, iplist
+        return ips, ipList
 
     except Exception as x:
         sys.exit("Encountered exception in nmap parse " + str(x))
 
-def shodanScan(ips):
+def shodanScan(ipList):
     '''
     Use Shodan.io API to find externally exposed IPs
 
@@ -151,23 +151,36 @@ def shodanScan(ips):
     api = Shodan(key)
 
     #get results from search
-    for _ip in ips:
+    ips = []
+    for _ip in ipList:
         print(_ip)
         try:
-            host = api.host(_ip)
+            host = api.host(_ip) #search hosts by IP
             ip = host["ip_str"]
+            hostname = host['hostnames'][0]
             
+            #get ports from host data
             ports = []
             for item in host["data"]:
-                ports.append(item['port'])
-            print(ports)
+                #generate port object
+                _PortObj = PortObj(item["port"], None, None)
+                ports.append(_PortObj)
+
+            #generate ip object
+            _IPObj = IPObj(ip, ports, hostname)
+            ips.append(_IPObj)
 
         except Exception as x:
             print("Encountered exception in Shodan search " + str(x))
+
+    return ips
 
 if __name__ == "__main__":
     if (len(sys.argv) < 2 or sys.argv[1][-3:] != "xml"): #require nmap scan in xml format
         sys.exit("Usage: python3 nmap_shodan_scan.py path/to/nmapscan.xml")
 
     nmapResults = XMLParse(str(sys.argv[1]))
-    shodanScan(nmapResults[1])
+    shodanResults = shodanScan(nmapResults[1])
+
+    for x in shodanResults:
+        print(x)
