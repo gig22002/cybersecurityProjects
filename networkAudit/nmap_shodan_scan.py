@@ -222,13 +222,12 @@ def Export(path, nmapResults, shodanResults):
         #make two dimensional per port per IPObj
         for ip in _obj.arr():
             l = ip
+            l.append("")
             #detect if port is external
             if (ip[0] in shodanResults):
                 for _port in shodanResults[ip[0]].ports:
                     if (str(ip[2]) == str(_port.portid)):
-                        l.append(ip[2])
-                    else: l.append("")
-            else: l.append("")
+                        l[-1] = ip[2]
 
             array.append(l)
 
