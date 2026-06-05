@@ -24,8 +24,8 @@ The multithreaded version is over 500% faster than the sequential version.
 
 For my scans, I used the following command:
 
-`nmap -T4 -Pn --open -oX output.xml ip.in.CIDR.0/format`
+`nmap -T4 -Pn -sV --open -oX output.xml ip.in.CIDR.0/format`
 
-`-T4` to speed up the scan, `-Pn` to treat all hosts as online (circumvents blocked discovery probes), `--open` to only output open ports (required for this program), `-oX output.xml` to output to xml (required for this program), and finally the IP range to scan.
+`-T4` to speed up the scan, `-Pn` to treat all hosts as online (circumvents blocked discovery probes), `-sV` enables version/service detection, `--open` to only output open ports (required for this program), `-oX output.xml` to output to xml (required for this program), and finally the IP range to scan.
 
 ###### Created by Gio Girasoli for UConn ITS 06/05/26
