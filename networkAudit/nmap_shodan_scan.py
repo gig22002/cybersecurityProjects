@@ -140,12 +140,13 @@ def XMLParse(path):
             ips.append(_IPObj)
             ipList.append(ip)
 
+        print("[!] Nmap results parsed.")
         return ips, ipList
 
     except Exception as x:
         sys.exit("Encountered exception in Nmap parse " + str(x))
 
-def shodanScan(ipList, verbose=False):
+def ShodanScan(ipList, verbose=False):
     '''
     Use Shodan.io API to find externally exposed IPs
 
@@ -187,6 +188,7 @@ def shodanScan(ipList, verbose=False):
         except Exception as x:
             if(verbose): print("Encountered exception in Shodan search " + str(x))
 
+    print("[!] Shodan results parsed.")
     return ips
 
 def Export(path, nmapResults, shodanResults):
@@ -209,11 +211,14 @@ def Export(path, nmapResults, shodanResults):
     '''
     
     #create initial array
+    #entry format:
+    #   [ip, hostname, port, protocol, service, externalPort]
     array = []
     for _obj in nmapResults:
         #make two dimensional per port per IPObj
         for ip in _obj.arr():
             l = ip
+            #detect if port is external
             if (ip[0] in shodanResults):
                 for _port in shodanResults[ip[0]].ports:
                     if (str(ip[2]) == str(_port.portid)):
@@ -223,7 +228,20 @@ def Export(path, nmapResults, shodanResults):
 
             array.append(l)
 
+    #convert to dataframe
     npObj = np.array(array)
+    df = pd.DataFrame(npObj, columns=[
+        "IP",
+        "Hostname",
+        "Internal Port",
+        "Protocol",
+        "Service",
+        "External (Internet) Port"])
+    try:
+        df.to_csv(path)
+        print(f"[!] Data successfully exported to {path}")
+    except:
+        print(f"Failed to export data to {path}")
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -231,6 +249,7 @@ if __name__ == "__main__":
     longOpts = ["verbose", "file="]
     verbose = False
     path = None
+    outPath = "./out.csv"
 
     try:
         arguments, vals = getopt.getopt(args, options, longOpts)
@@ -245,9 +264,7 @@ if __name__ == "__main__":
         sys.exit("Usage: python3 nmap_shodan_scan.py -f path/to/nmapscan.xml")
 
     nmapResults = XMLParse(str(path))
-    print("[!] Nmap results parsed.")
-    shodanResults = {"137.99.146.200": IPObj("137.99.146.200", [PortObj(80, None, None)], None)}
-    Export("./out.csv", nmapResults[0], shodanResults)
-    shodanResults = shodanScan(nmapResults[1], verbose)
-    print("[!] Shodan results parsed.")
 
+    shodanResults = ShodanScan(nmapResults[1], verbose)
+
+    Export(outPath, nmapResults[0], shodanResults)
