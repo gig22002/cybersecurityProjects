@@ -1,6 +1,6 @@
 #!/bin/python3
 
-import sys, os
+import getopt, sys, os
 from dotenv import load_dotenv
 from shodan import Shodan
 import requests
@@ -94,32 +94,32 @@ def XMLParse(path):
           example: /path/to/scan.xml
           description: The file path to the desired .xml nmap scan
     '''
-    #hostdict = 
-
     try:
         #create xml tree object
         tree = et.parse(path)
         root = tree.getroot()
 
+        print(f"=== Parsing {root.get("args")} ===")
+
         #iterate through each scanned host
         ips = [] #scanned IP objects
         ipList = [] #list of contained IPs for Shodan
-        for host in root.findall('host'):
+        for host in root.findall("host"):
             #parse ip addr
-            ip = host.find('address').get('addr')
+            ip = host.find("address").get("addr")
 
             #parse hostname
-            hostname = host.find('hostnames').find('hostname').get('name')
+            hostname = host.find("hostnames").find("hostname").get("name")
 
             #parse port info
             portList = []
-            ports = host.find('ports')
-            for port in ports.findall('port'):
-                portid = port.get('portid')
-                protocol = port.get('protocol')
-                serviceField = port.find('service')
+            ports = host.find("ports")
+            for port in ports.findall("port"):
+                portid = port.get("portid")
+                protocol = port.get("protocol")
+                serviceField = port.find("service")
                 if serviceField is not None:
-                    service = serviceField.get('name')
+                    service = serviceField.get("name")
                 
                 #create port object and append to array
                 _PortObj = PortObj(portid, protocol, service)
@@ -133,9 +133,9 @@ def XMLParse(path):
         return ips, ipList
 
     except Exception as x:
-        sys.exit("Encountered exception in nmap parse " + str(x))
+        sys.exit("Encountered exception in Nmap parse " + str(x))
 
-def shodanScan(ipList):
+def shodanScan(ipList, verbose=False):
     '''
     Use Shodan.io API to find externally exposed IPs
 
@@ -153,10 +153,11 @@ def shodanScan(ipList):
     #get results from search
     ips = []
     for _ip in ipList:
-        print(_ip)
+        if(verbose): print(f"Querying {_ip}...")
         try:
             host = api.host(_ip) #search hosts by IP
             ip = host["ip_str"]
+            if(verbose): print(f"IP {ip} found externally.")
             hostname = host['hostnames'][0]
             
             #get ports from host data
@@ -171,16 +172,30 @@ def shodanScan(ipList):
             ips.append(_IPObj)
 
         except Exception as x:
-            print("Encountered exception in Shodan search " + str(x))
+            if(verbose): print("Encountered exception in Shodan search " + str(x))
 
     return ips
 
 if __name__ == "__main__":
-    if (len(sys.argv) < 2 or sys.argv[1][-3:] != "xml"): #require nmap scan in xml format
-        sys.exit("Usage: python3 nmap_shodan_scan.py path/to/nmapscan.xml")
+    args = sys.argv[1:]
+    options = "vf:"
+    longOpts = ["verbose", "file="]
+    verbose = False
+    path = None
 
-    nmapResults = XMLParse(str(sys.argv[1]))
-    shodanResults = shodanScan(nmapResults[1])
+    try:
+        arguments, vals = getopt.getopt(args, options, longOpts)
+        for _arg, _val in arguments:
+            if _arg in ("-v", "--verbose"):
+                verbose = True
+            elif _arg in ("-f", "--file"):
+                path = _val
+    except:
+        sys.exit("Usage: python3 nmap_shodan_scan.py -f path/to/nmapscan.xml")
+    if path == None:
+        sys.exit("Usage: python3 nmap_shodan_scan.py -f path/to/nmapscan.xml")
 
-    for x in shodanResults:
-        print(x)
+    nmapResults = XMLParse(str(path))
+    print("[!] Nmap results parsed.")
+    shodanResults = shodanScan(nmapResults[1], verbose)
+    print("[!] Shodan results parsed.")
