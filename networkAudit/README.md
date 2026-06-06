@@ -29,3 +29,5 @@ For my scans, I used the following command:
 `-T4` to speed up the scan, `-Pn` to treat all hosts as online (circumvents blocked discovery probes), `-sV` enables version/service detection, `--open` to only output open ports (required for this program), `-oX output.xml` to output to xml (required for this program), and finally the IP range to scan.
 
 ###### Created by Gio Girasoli for UConn ITS 06/05/26
+
+###### No AI was used in the making of this program.
