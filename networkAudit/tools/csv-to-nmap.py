@@ -21,7 +21,8 @@ if __name__ == "__main__":
     path = sys.argv[1]
 
     try:
-        arr = np.loadtxt(path, dtype=str)
+        data = pd.read_csv(path)
+        arr = data.to_numpy()
 
     except Exception as x:
         sys.exit(f"Failed to load file {path} with exception {x}")
