@@ -36,7 +36,10 @@ def ExecuteNmap(arr, path):
     #loop through each ip in first col
     for i in range(len(arr[:, 0])):
         #check if scanned
-        isScanned = bool(arr[:, 2][i])
+        if str(arr[:, 2][i]) == "True" or str(arr[:, 2][i]) == "1":
+            isScanned = True
+        else: isScanned = False
+
         if isScanned: continue
 
         #get values
@@ -76,6 +79,13 @@ if __name__ == "__main__":
     try:
         data = pd.read_csv(path, header=None) #header=None needed to not skip first row
         arr = data.to_numpy()
+        
+        #check if there is header
+        if str(arr[0][0]) == "nan":
+            arr = np.delete(arr, (0), axis=1) #drop index column
+            if "137.99." not in str(arr[0][0]): 
+                arr = np.delete(arr, (0), axis=0) #drop header row
+
     except Exception as x:
         sys.exit(f"Failed to load file {path} with exception {x}")
 
