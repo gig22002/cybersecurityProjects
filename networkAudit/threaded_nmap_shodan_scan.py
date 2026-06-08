@@ -341,6 +341,9 @@ if __name__ == "__main__":
         sys.exit("Usage: python3 nmap_shodan_scan.py -f path/to/nmapscan.xml")
 
     nmapResults = XMLParse(str(path), verbose)
+    #abort if no ips
+    if len(nmapResults[1]) == 0:
+        sys.exit("No open ports detected by Nmap.")
 
     shodanResults = ShodanScan(nmapResults[1], verbose)
 
