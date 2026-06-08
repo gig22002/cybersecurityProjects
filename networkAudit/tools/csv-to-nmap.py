@@ -83,7 +83,7 @@ if __name__ == "__main__":
         #check if there is header
         if str(arr[0][0]) == "nan":
             arr = np.delete(arr, (0), axis=1) #drop index column
-            if "137.99." not in str(arr[0][0]): 
+            if "/" not in str(arr[0][0]): 
                 arr = np.delete(arr, (0), axis=0) #drop header row
 
     except Exception as x:
