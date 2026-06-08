@@ -28,6 +28,12 @@ For my scans, I used the following command:
 
 `-T4` to speed up the scan, `-Pn` to treat all hosts as online (circumvents blocked discovery probes), `-sV` enables version/service detection, `--open` to only output open ports (required for this program), `-oX output.xml` to output to xml (required for this program), and finally the IP range to scan.
 
+To automatically scan IPs from a csv table, included is `tools/csv-to-nmap.py`.
+
+Create a table with three columns and no header row. Column 1 should be IPs in CIDR format, Column 2 should be the name of the range, and Column 3 should be all zeros (used to detect if an ip has already been scanned for continuity).
+
+Then, run `python3 csv-to-nmap.py path/to/csv`. This will then automatically scan and output to xml the chosen IPs, which can then be fed into `threaded_nmap_shodan_scan.py`.
+
 ###### Created by Gio Girasoli for UConn ITS 06/05/26
 
 ###### No AI was used in the making of this program.
