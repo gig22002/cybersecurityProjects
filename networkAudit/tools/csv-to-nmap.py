@@ -36,7 +36,7 @@ def ExecuteNmap(arr, path):
     #loop through each ip in first col
     for i in range(len(arr[:, 0])):
         #check if scanned
-        if str(arr[:, 2][i]) == "True" or str(arr[:, 2][i]) == "1":
+        if str(arr[:, 2][i]).lower() == "true" or str(arr[:, 2][i]) == "1":
             isScanned = True
         else: isScanned = False
 
