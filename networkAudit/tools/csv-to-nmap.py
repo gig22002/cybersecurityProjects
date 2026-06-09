@@ -56,13 +56,16 @@ def ExecuteNmap(arr, path, fast=False):
         #construct output filename
         #   format: count-col2name-timestamp.xml
         fname = f"{(i+1):03}-{name.replace("/","")}-%T-%D.xml"
-        #if fast, use -F
-        fastFlag = "-sT"
-        if fast: fastFlag = "-F"
+        #if fast, use -F and not -Pn
+        fastFlag = "-sT" #default is default scan type
+        ping = "-Pn" #default is skip host discovery
+        if fast:
+            fastFlag = "-F" 
+            ping = "--reason"
         
         #run nmap in shell
         print(f"=== Scanning {ip} ===")
-        process = subprocess.run(["nmap", "-v", fastFlag, "-T4", "-sV", "-Pn", "--open", "-oX", fname, ip])
+        process = subprocess.run(["nmap", "-v", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip])
 
         if process.returncode == 0:
             #successfully scanned
