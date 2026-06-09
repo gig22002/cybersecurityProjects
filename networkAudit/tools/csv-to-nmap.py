@@ -60,7 +60,7 @@ def ExecuteNmap(arr, path, fast=False):
         fastFlag = "-sT" #default is default scan type
         ping = "-Pn" #default is skip host discovery
         if fast:
-            fastFlag = "-F" 
+#            fastFlag = "-F" 
             ping = "--reason"
         
         #run nmap in shell
