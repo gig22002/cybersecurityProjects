@@ -54,7 +54,11 @@ def ScanHosts(index, ip, fname, fastFlag=0):
 
     #run nmap in shell
     print(f"=== Thread {workerName} scanning {(index+1):03}: {ip} ===")
-    process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip])
+    if fast == 0:
+        process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip])
+    else:
+        #no stdout if fast
+        process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip], stdout = subprocess.DEVNULL)
 
     if process.returncode == 0:
         #successfully scanned
