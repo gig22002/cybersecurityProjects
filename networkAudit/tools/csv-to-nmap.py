@@ -13,7 +13,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-def ExecuteNmap(arr, path):
+def ExecuteNmap(arr, path, fast=False):
     '''
     Function to execute nmap on each entry of the inputted csv
 
@@ -29,6 +29,11 @@ def ExecuteNmap(arr, path):
           type: string
           example: /path/to/csv
           description: The path of the csv passed in by args
+
+        - name: fast
+          type: bool
+          example: False, True
+          description: Whether or not to skip subnets of size 256 or greater.
     '''
     #backup csv
     dfbak = pd.DataFrame(arr, columns=None)
@@ -40,7 +45,9 @@ def ExecuteNmap(arr, path):
             isScanned = True
         else: isScanned = False
 
-        if isScanned: continue
+        #skip if fast scan
+        skip = fast and (int(arr[:, 0][i][-2:]) <= 24)
+        if isScanned or skip: continue
 
         #get values
         ip = str(arr[:, 0][i])
@@ -74,6 +81,10 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.exit("Usage: python3 csv-to-nmap.py path/to/iplist.csv")
     path = sys.argv[1]
+    
+    fast = False
+    if len(sys.argv) >= 3 and str(sys.argv[2]) == "-F":
+        fast = True
 
     #convert csv -> pandas dataframe -> numpy array
     try:
@@ -89,4 +100,4 @@ if __name__ == "__main__":
     except Exception as x:
         sys.exit(f"Failed to load file {path} with exception {x}")
 
-    ExecuteNmap(arr, path)
+    ExecuteNmap(arr, path, fast)
