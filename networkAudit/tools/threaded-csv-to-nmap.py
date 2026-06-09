@@ -41,9 +41,9 @@ def ScanHosts(index, ip, fname, fastFlag=0):
           description: Integer flag on what level of speed to use for nmap (at the cost of accuracy)
     '''
     #get thread number
-    workerName = current_thread().name.replace("ThreadPoolExecutor-", "")
+    workerid = int(current_thread().name.replace("ThreadPoolExecutor-0_", ""))
+    workerName = str(workerid+1)
 
-    fname = f"{(index+1):03}TEST.xml" #test naming
     #populate flags
     fastFlag = "-sT" #default is default scan type
     ping = "-Pn" #default is skip host discovery
