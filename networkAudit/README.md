@@ -34,8 +34,11 @@ Create a table with three columns and no header row. Column 1 should be IPs in C
 
 Then, run `python3 csv-to-nmap.py path/to/csv`. This will then automatically scan and output to xml the chosen IPs, which can then be fed into `threaded_nmap_shodan_scan.py`.
 
-Optionally, the `-F` option may be passed at the end of the command: `python3 csv-to-nmap.py path/to/csv -F`. This skips subnets with 256 or greater hosts and uses ping discovery (i.e. does not use `-Pn`).
+Optionally, the `-F` option may be passed at the end of the command: `python3 csv-to-nmap.py path/to/csv -F`.   
+Increasing the amount of Fs increases the speed:   
+`-F`: skips subnets of size 256 or larger   
+`-FF`: also uses nmap `-F` flag (i.e. only scans top 100 ports)   
+`-FFF`: also uses ping host discovery (i.e. does NOT use `-Pn`)   
 
-###### Created by Gio Girasoli for UConn ITS 06/05/26
-
+###### Created by Gio Girasoli for UConn ITS 06/05/26   
 ###### No AI was used in the making of this program.

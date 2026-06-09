@@ -31,9 +31,13 @@ def ExecuteNmap(arr, path, fast=False):
           description: The path of the csv passed in by args
 
         - name: fast
-          type: bool
-          example: False, True
-          description: Whether or not to skip subnets of size 256 or greater.
+          type: integer
+          example: 0, 1, 2
+          description: The speed at which nmap will scan, at the cost of accuracy. Each level includes the last.
+            0: default settings
+            1: skips subnets of size 256 or greater
+            2: only scans top 100 ports
+            3: uses ping discovery
     '''
     #backup csv
     dfbak = pd.DataFrame(arr, columns=None)
@@ -46,7 +50,7 @@ def ExecuteNmap(arr, path, fast=False):
         else: isScanned = False
 
         #skip if fast scan
-        skip = fast and (int(arr[:, 0][i][-2:]) <= 24)
+        skip = fast >= 1 and (int(arr[:, 0][i][-2:]) <= 24)
         if isScanned or skip: continue
 
         #get values
@@ -59,8 +63,9 @@ def ExecuteNmap(arr, path, fast=False):
         #if fast, use -F and not -Pn
         fastFlag = "-sT" #default is default scan type
         ping = "-Pn" #default is skip host discovery
-        if fast:
-#            fastFlag = "-F" 
+        if fast >= 2:
+            fastFlag = "-F" 
+        if fast >= 3:
             ping = "--reason"
         
         #run nmap in shell
@@ -88,9 +93,17 @@ if __name__ == "__main__":
         sys.exit("Usage: python3 csv-to-nmap.py path/to/iplist.csv")
     path = sys.argv[1]
     
-    fast = False
-    if len(sys.argv) >= 3 and str(sys.argv[2]) == "-F":
-        fast = True
+    fast = 0
+    if len(sys.argv) >= 3:
+        #fast lvl 1
+        if str(sys.argv[2]) == "-F":
+            fast = 1
+        #fast lvl 2
+        elif str(sys.argv[2]) == "-FF":
+            fast = 2
+        #fast lvl 3
+        elif str(sys.argv[2]) == "-FFF":
+            fast = 3
 
     #convert csv -> pandas dataframe -> numpy array
     try:
