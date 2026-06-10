@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import concurrent.futures
 from threading import current_thread
+import argparse
 
 def ScanHosts(index, ip, fname, fastFlag=0):
     '''
@@ -145,7 +146,32 @@ def ExecuteNmap(arr, path, fast=0):
                 dfbak.to_csv(path)
                 sys.exit("Aborting...")
 
+def CreateArgs():
+    ''' Helper function that creates an argparser object '''
+    #create parser object
+    parser = argparse.ArgumentParser(description = "A tool to scan a list of subnets from a csv file.")
+
+    #input file
+    parser.add_argument("input", help="Input csv to scan from.")
+
+    #fast argument
+    parser.add_argument("-F", "--fast", action="count", help="Increase fastness level.")
+
+    #quiet nmap output
+    parser.add_argument("-q", "--quiet", action="store_true", help="Disables Nmap stdout.")
+
+    #num threads
+    parser.add_argument("--max-workers", action="store", default=4, help="Number of worker threads. Default=4")
+
+    return parser
+
 if __name__ == "__main__":
+    #parse args
+    parser = CreateArgs()
+    args = parser.parse_args()
+    print(args.input)
+    print(args.fast)
+
     #require path arg
     if len(sys.argv) < 2:
         sys.exit("Usage: python3 csv-to-nmap.py path/to/iplist.csv")
