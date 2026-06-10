@@ -32,13 +32,17 @@ To automatically scan IPs from a csv table, included is `tools/csv-to-nmap.py`.
 
 Create a table with three columns and no header row. Column 1 should be IPs in CIDR format, Column 2 should be the name of the range, and Column 3 should be all zeros (used to detect if an ip has already been scanned for continuity).
 
-Then, run `python3 threaded-csv-to-nmap.py path/to/csv`. This will then automatically scan (with 4 worker threads) and output to xml the chosen IPs, which can then be fed into `threaded_nmap_shodan_scan.py`.
+Then, run `python3 threaded-csv-to-nmap.py path/to/csv`. This will then automatically scan (with, by default, 4 worker threads) and output to xml the chosen IPs, which can then be fed into `threaded_nmap_shodan_scan.py`.
 
-Optionally, the `-F` option may be passed at the end of the command: `python3 csv-to-nmap.py path/to/csv -F`.   
+Optionally, the `-F` or `--fast` option may be passed at the end of the command: `python3 csv-to-nmap.py path/to/csv -F`.   
 Increasing the amount of Fs increases the speed:   
 `-F`: skips subnets of size 256 or larger   
 `-FF`: also uses nmap `-F` flag (i.e. only scans top 100 ports)   
 `-FFF`: also uses ping host discovery (i.e. does NOT use `-Pn`)   
+
+The `-q` or `--quiet` option may be passed to disable Nmap output to the console.
+
+The `--max_workers INT` option may be passed to specify the max number of worker threads, with the default being 4.
 
 ###### Created by Gio Girasoli for UConn ITS 06/05/26   
 ###### No AI was used in the making of this program.

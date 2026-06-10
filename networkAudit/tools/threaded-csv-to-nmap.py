@@ -16,7 +16,7 @@ import concurrent.futures
 from threading import current_thread
 import argparse
 
-def ScanHosts(index, ip, fname, fastFlag=0):
+def ScanHosts(index, ip, fname, fastFlag=0, quiet=False):
     '''
     Helper function for multithreaded nmap scanning
 
@@ -40,6 +40,11 @@ def ScanHosts(index, ip, fname, fastFlag=0):
           type: integer
           example: 0, 1, 2, 3
           description: Integer flag on what level of speed to use for nmap (at the cost of accuracy)
+
+        - name: quiet
+          type: boolean
+          example: False, True
+          description: Whether or not to disable Nmap stdout
     '''
     #get thread number
     workerid = int(current_thread().name.replace("ThreadPoolExecutor-0_", ""))
@@ -55,11 +60,10 @@ def ScanHosts(index, ip, fname, fastFlag=0):
 
     #run nmap in shell
     print(f"=== Thread {workerName} scanning {(index+1):03}: {ip} ===")
-    if fast == 0:
-        process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip])
-    else:
-        #no stdout if fast
+    if quiet:
         process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip], stdout = subprocess.DEVNULL)
+    else:
+        process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip])
 
     #return index of scan and if it was successful
     if process.returncode == 0:
@@ -70,7 +74,7 @@ def ScanHosts(index, ip, fname, fastFlag=0):
         print(f"[!] Thread {workerName} failed to scan index {index+1} on {ip}")
         return index, False
 
-def ExecuteNmap(arr, path, fast=0):
+def ExecuteNmap(arr, path, fast=0, quiet=False, numThreads=4):
     '''
     Function to execute nmap on each entry of the inputted csv
 
@@ -95,13 +99,23 @@ def ExecuteNmap(arr, path, fast=0):
             1: skips subnets of size 256 or greater
             2: only scans top 100 ports
             3: uses ping discovery
+
+        - name: quiet
+          type: boolean
+          example: False, True
+          description: Whether or not to disable Nmap stdout
+
+        - name: numThreads
+          type: integer
+          example: 4, 5
+          description: The max number of workers for the Thread Pool
     '''
     #backup csv
     dfbak = pd.DataFrame(arr, columns=None)
 
     #create and collect threads for scans
     processes = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as e:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=numThreads) as e:
         #loop through each ip in first col
         for i in range(len(arr[:, 0])):
             #check if scanned
@@ -122,7 +136,7 @@ def ExecuteNmap(arr, path, fast=0):
             fname = f"{(i+1):03}-{name.replace("/","")}-%T-%D.xml"
 
             #run worker
-            processes.append(e.submit(ScanHosts, i, ip, fname, fast))
+            processes.append(e.submit(ScanHosts, i, ip, fname, fast, quiet))
 
         #collect results
         for thread in concurrent.futures.as_completed(processes):
@@ -155,13 +169,13 @@ def CreateArgs():
     parser.add_argument("input", help="Input csv to scan from.")
 
     #fast argument
-    parser.add_argument("-F", "--fast", action="count", help="Increase fastness level.")
+    parser.add_argument("-F", "--fast", action="count", default=0, help="Increase fastness level.")
 
     #quiet nmap output
     parser.add_argument("-q", "--quiet", action="store_true", help="Disables Nmap stdout.")
 
     #num threads
-    parser.add_argument("--max-workers", action="store", default=4, help="Number of worker threads. Default=4")
+    parser.add_argument("--max_workers", action="store", default=4, help="Number of worker threads. Default=4")
 
     return parser
 
@@ -169,25 +183,11 @@ if __name__ == "__main__":
     #parse args
     parser = CreateArgs()
     args = parser.parse_args()
-    print(args.input)
-    print(args.fast)
 
-    #require path arg
-    if len(sys.argv) < 2:
-        sys.exit("Usage: python3 csv-to-nmap.py path/to/iplist.csv")
-    path = sys.argv[1]
-    
-    fast = 0
-    if len(sys.argv) >= 3:
-        #fast lvl 1
-        if str(sys.argv[2]) == "-F":
-            fast = 1
-        #fast lvl 2
-        elif str(sys.argv[2]) == "-FF":
-            fast = 2
-        #fast lvl 3
-        elif str(sys.argv[2]) == "-FFF":
-            fast = 3
+    path = args.input
+    fast = int(args.fast)
+    quiet = args.quiet
+    numThreads = int(args.max_workers)
 
     #convert csv -> pandas dataframe -> numpy array
     try:
@@ -203,4 +203,4 @@ if __name__ == "__main__":
     except Exception as x:
         sys.exit(f"Failed to load file {path} with exception {x}")
 
-    ExecuteNmap(arr, path, fast)
+    ExecuteNmap(arr, path, fast, quiet, numThreads)
