@@ -18,6 +18,8 @@ This data is outputted as a .csv file with the columns of IP, Hostname, Internal
 
 Optionally, you can include the `-v` flag before the `-f` flag for verbose output.
 
+In the event Shodan discovers a port that Nmap did not, an alert with that IP will be printed. This is most likely due to the internet-exposed ports being outside of the top 1000 ports Nmap typically scans; to remedy this, simply rerun the scan separately with the `-p-` flag to scan all ports.
+
 The multithreaded version is over 500% faster than the sequential version.
 
 ## Nmap
