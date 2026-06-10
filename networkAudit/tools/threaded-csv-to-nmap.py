@@ -60,13 +60,13 @@ def ScanHosts(index, ip, fname, fastFlag=0):
         #no stdout if fast
         process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip], stdout = subprocess.DEVNULL)
 
+    #return index of scan and if it was successful
     if process.returncode == 0:
         #successfully scanned
-        #arr[:, 2][i] = True
         print(f"[!] Thread {workerName} scan of index {index+1} on {ip} completed successfully")
         return index, True
     else:
-        print(f"Failed to scan index {index+1} on {ip}")
+        print(f"[!] Thread {workerName} failed to scan index {index+1} on {ip}")
         return index, False
 
 def ExecuteNmap(arr, path, fast=0):
@@ -128,11 +128,11 @@ def ExecuteNmap(arr, path, fast=0):
             #update numpy array
             try:
                 #get output
-                _ip = thread.result()[0]
-                _index = thread.result()[1]
+                _index = thread.result()[0]
+                _scanned = thread.result()[1]
 
                 #set array
-                arr[:, 2][_index] = True
+                arr[:, 2][_index] = _scanned
             except Exception as x:
                 print(f"Encountered exception cleaning up thread for scan: {x}")
 
