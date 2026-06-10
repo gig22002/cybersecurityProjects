@@ -16,7 +16,7 @@ import concurrent.futures
 from threading import current_thread
 import argparse
 
-def ScanHosts(index, ip, fname, fastFlag=0, quiet=False):
+def ScanHosts(index, ip, fname, fastFlag=0, quiet=False, stealthy=False):
     '''
     Helper function for multithreaded nmap scanning
 
@@ -45,6 +45,11 @@ def ScanHosts(index, ip, fname, fastFlag=0, quiet=False):
           type: boolean
           example: False, True
           description: Whether or not to disable Nmap stdout
+
+        - name: stealthy
+          type: boolean
+          example: False, True
+          description: Whether or not to use stealthy Nmap options
     '''
     #get thread number
     workerid = int(current_thread().name.replace("ThreadPoolExecutor-0_", ""))
@@ -60,10 +65,15 @@ def ScanHosts(index, ip, fname, fastFlag=0, quiet=False):
 
     #run nmap in shell
     print(f"=== Thread {workerName} scanning {(index+1):03}: {ip} ===")
-    if quiet:
+    if quiet and not stealthy:
         process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip], stdout = subprocess.DEVNULL)
+    elif quiet and stealthy:
+        process = subprocess.run(["sudo", "nmap", "-sS", "-T2", "-F", "-Pn", "--disable-arp-ping", "-ff", "--open", "-oX", fname, ip], stdout = subprocess.DEVNULL)
+    elif stealthy:
+        process = subprocess.run(["sudo", "nmap", "-sS", "-T2", "-F", "-Pn", "--disable-arp-ping", "-ff", "--open", "-oX", fname, ip])
     else:
         process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip])
+
 
     #return index of scan and if it was successful
     if process.returncode == 0:
@@ -74,7 +84,7 @@ def ScanHosts(index, ip, fname, fastFlag=0, quiet=False):
         print(f"[!] Thread {workerName} failed to scan index {index+1} on {ip}")
         return index, False
 
-def ExecuteNmap(arr, path, fast=0, quiet=False, numThreads=4):
+def ExecuteNmap(arr, path, fast=0, quiet=False, stealthy=False, numThreads=4):
     '''
     Function to execute nmap on each entry of the inputted csv
 
@@ -104,6 +114,11 @@ def ExecuteNmap(arr, path, fast=0, quiet=False, numThreads=4):
           type: boolean
           example: False, True
           description: Whether or not to disable Nmap stdout
+
+        - name: stealthy
+          type: boolean
+          example: False, True
+          description: Whether or not to use stealthy Nmap options
 
         - name: numThreads
           type: integer
@@ -136,7 +151,7 @@ def ExecuteNmap(arr, path, fast=0, quiet=False, numThreads=4):
             fname = f"{(i+1):03}-{name.replace("/","")}-%T-%D.xml"
 
             #run worker
-            processes.append(e.submit(ScanHosts, i, ip, fname, fast, quiet))
+            processes.append(e.submit(ScanHosts, i, ip, fname, fast, quiet, stealthy))
 
         #collect results
         for thread in concurrent.futures.as_completed(processes):
@@ -177,6 +192,9 @@ def CreateArgs():
     #num threads
     parser.add_argument("--max_workers", action="store", default=4, help="Number of worker threads. Default=4")
 
+    #stealth mode
+    parser.add_argument("-sS", "--stealthy", action="store_true", help="Use \"stealthy\" Nmap options. NOTE: requires privilege")
+
     return parser
 
 if __name__ == "__main__":
@@ -187,6 +205,7 @@ if __name__ == "__main__":
     path = args.input
     fast = int(args.fast)
     quiet = args.quiet
+    stealthy = args.stealthy
     numThreads = int(args.max_workers)
 
     #convert csv -> pandas dataframe -> numpy array
@@ -203,4 +222,4 @@ if __name__ == "__main__":
     except Exception as x:
         sys.exit(f"Failed to load file {path} with exception {x}")
 
-    ExecuteNmap(arr, path, fast, quiet, numThreads)
+    ExecuteNmap(arr, path, fast, quiet, stealthy, numThreads)

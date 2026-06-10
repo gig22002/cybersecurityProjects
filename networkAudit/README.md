@@ -44,6 +44,8 @@ Increasing the amount of Fs increases the speed:
 
 The `-q` or `--quiet` option may be passed to disable Nmap output to the console.
 
+The `-sS` or `--stealthy` option may be passed to use "stealthy" Nmap options.
+
 The `--max_workers INT` option may be passed to specify the max number of worker threads, with the default being 4.
 
 ###### Created by Gio Girasoli for UConn ITS 06/05/26   
