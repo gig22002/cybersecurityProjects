@@ -35,6 +35,7 @@ if __name__ == "__main__":
             if not f.is_file(): continue #skip if not file
             #obtain file name
             fname = os.path.basename(f.name)
+            fname = f"{path}/{fname}"
         
             if fname[-3:] != "xml": continue #skip if not xml
             processes.append(e.submit(ExecuteScan, fname))
