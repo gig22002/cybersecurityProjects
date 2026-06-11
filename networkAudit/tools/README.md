@@ -30,6 +30,8 @@ In the event Shodan discovers a port that Nmap did not, an alert with that IP wi
 
 The multithreaded version is over 500% faster than the sequential version.
 
+If you have a bunch of xml files you'd like to process automatically, run `python3 directory_xml_passer.py optional/path/to/dir`. This traverses the specified directory (default: current working dir), passing the xml files to `threaded_nmap_shodan_scan.py`.
+
 ## Nmap
 
 For my scans, I used the following command:

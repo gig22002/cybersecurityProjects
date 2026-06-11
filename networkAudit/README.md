@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a command line tool intended to enumerate a list of subnets from a csv file ia Nmap, then transform the xml output of the Nmap scan in conjunction with paired data from Shodan.io to discover internal and external port exposures on a network.
+This is a command line tool intended to enumerate a list of subnets from a csv file via Nmap, then transform the xml output of the Nmap scan in conjunction with paired data from Shodan.io to discover internal and external port exposures on a network.
 
 ## Usage
 
