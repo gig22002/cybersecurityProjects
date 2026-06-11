@@ -53,7 +53,6 @@ def ScanHosts(index, ip, fname, fastFlag=0, quiet=False, stealthy=False):
           example: False, True
           description: Whether or not to use stealthy Nmap options
     '''
-    fname = "TEST123"+fname
     #get thread number
     workerid = int(current_thread().name.replace("ThreadPoolExecutor-0_", ""))
     workerName = str(workerid+1)
@@ -78,14 +77,19 @@ def ScanHosts(index, ip, fname, fastFlag=0, quiet=False, stealthy=False):
         process = subprocess.run(["nmap", fastFlag, "-T4", "-sV", ping, "--open", "-oX", fname, ip])
 
 
-    #return index of scan, if it was successful, and the fname
+    #return index of scan and if it was successful
     if process.returncode == 0:
         #successfully scanned
         print(f"[!] Thread {workerName} scan of index {index+1} on {ip} completed successfully")
-        return index, True, fname
+
+        #start nmap shodan scanner
+        print(f"[!] Thread {workerName} starting threaded_nmap_shodan_scan on index {index+1}...")
+        process = subprocess.run(["python3", "tools/threaded_nmap_shodan_scan.py", "-f", fname])
+
+        return index, True
     else:
         print(f"[!] Thread {workerName} failed to scan index {index+1} on {ip}")
-        return index, False, fname
+        return index, False
 
 def ExecuteNmap(arr, path, fast=0, quiet=False, stealthy=False, numThreads=4):
     '''
@@ -153,7 +157,7 @@ def ExecuteNmap(arr, path, fast=0, quiet=False, stealthy=False, numThreads=4):
             #   format: count-col2name-timestamp.xml
             now = datetime.now()
             timestamp = now.strftime("%H-%M-%S-%y-%m-%d")
-            fname = f"{(i+1):03}-{name.replace("/","")}-{timestamp}.xml"
+            fname = f"rawScans/{(i+1):03}-{name.replace("/","")}-{timestamp}.xml"
 
             #run worker
             processes.append(e.submit(ScanHosts, i, ip, fname, fast, quiet, stealthy))
@@ -203,6 +207,10 @@ def CreateArgs():
     return parser
 
 if __name__ == "__main__":
+    #create outputs
+    if not os.path.exists("rawScans/"):
+        os.mkdir("rawScans/")
+
     #parse args
     parser = CreateArgs()
     args = parser.parse_args()
