@@ -37,5 +37,5 @@ if __name__ == "__main__":
             fname = os.path.basename(f.name)
             fname = f"{path}/{fname}"
         
-            if fname[-3:] != "xml": continue #skip if not xml
+            if fname[-3:].lower() != "xml": continue #skip if not xml
             processes.append(e.submit(ExecuteScan, fname))
