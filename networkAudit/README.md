@@ -20,7 +20,7 @@ Column 1: IPs in CIDR format
 Column 2: name of the subnet for file output  
 Column 3: all zeros (used to record if a subnet has already been scanned)
 
-Optionally, the `-F` or `--fast` option may be passed at the end of the command: `python3 csv-to-nmap.py path/to/csv -F`.   
+Optionally, the `-F` or `--fast` option may be passed at the end of the command: `python3 orchestrator.py path/to/csv -F`.   
 Increasing the amount of Fs increases the speed:   
 `-F`: skips subnets of size 256 or larger   
 `-FF`: also uses nmap `-F` flag (i.e. only scans top 100 ports)   
