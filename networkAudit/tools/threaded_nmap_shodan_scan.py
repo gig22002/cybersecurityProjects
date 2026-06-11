@@ -146,6 +146,7 @@ def XMLParse(path, verbose=False):
                 serviceField = port.find("service")
                 if serviceField is not None:
                     service = serviceField.get("name")
+                else: service = ""
                 
                 #create port object and append to array
                 _PortObj = PortObj(portid, protocol, service)
