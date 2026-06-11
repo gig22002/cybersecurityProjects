@@ -12,11 +12,13 @@ These are several tools for performing a network/firewall audit and enumeration.
 
 The main program file is `../orchestrator.py`, which is essentially `threaded_csv_to_nmap.py` but also automatically passes results to `threaded_nmap_shodan_scan.py`.
 
+Note the sequential versions are missing useful QoL features, e.g. preventing certain errors for edge cases.
+
 ## Usage
 
 Create a `.env` file in THIS directory containing your Shodan API key in the format of `SHODAN_KEY=yourKeyHere`.
 
-Install the required libraries with `pip install -r requirements.txt`.
+Install the required libraries with `pip install -r ../requirements.txt`.
 
 Run `python3 threaded_nmap_shodan_scan.py -f path/to/nmapscan.xml`.
 
