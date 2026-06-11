@@ -2,11 +2,19 @@
 
 ## Overview
 
-This is a command line tool intended to transform an xml output of an Nmap scan in conjunction with paired data from Shodan.io to discover internal and external port exposures on a network.
+These are several tools for performing a network/firewall audit and enumeration.
+
+`threaded_nmap_shodan_scan.py`: Takes an Nmap xml output file and queries Shodan.io and outputs a csv detailing the ports exposed to Nmap and Shodan. A sequential (slower) version is also included.
+
+`threaded_csv_to_nmap.py`: Takes a csv of subnets to scan and runs Nmap on those IP sequences, outputting to xml for use with the former program. A sequential (slower) version is also included.
+
+`directory_xml_passer.py`: Traverses the current or specified directory for xml files to pass to `threaded_nmap_shodan_scan.py`.
+
+The main program file is `../orchestrator.py`, which is essentially `threaded_csv_to_nmap.py` but also automatically passes results to `threaded_nmap_shodan_scan.py`.
 
 ## Usage
 
-Create a `.env` file in this directory containing your Shodan API key in the format of `SHODAN_KEY=yourKeyHere`.
+Create a `.env` file in THIS directory containing your Shodan API key in the format of `SHODAN_KEY=yourKeyHere`.
 
 Install the required libraries with `pip install -r requirements.txt`.
 
@@ -49,4 +57,4 @@ The `-sS` or `--stealthy` option may be passed to use "stealthy" Nmap options.
 The `--max_workers INT` option may be passed to specify the max number of worker threads, with the default being 4.
 
 ###### Created by Gio Girasoli for UConn ITS 06/05/26   
-###### No AI was used in the making of this program.
+###### No AI was used in the making of these programs.
