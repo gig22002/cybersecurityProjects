@@ -236,3 +236,4 @@ if __name__ == "__main__":
         sys.exit(f"Failed to load file {path} with exception {x}")
 
     ExecuteNmap(arr, path, fast, quiet, stealthy, numThreads)
+    print("\nDone!")
