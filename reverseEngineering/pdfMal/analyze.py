@@ -26,6 +26,7 @@ if __name__ == "__main__":
     print(f"Creator: {meta.creator}")
     print(f"Producer: {meta.producer}")
     print(f"Creation Date: {meta.creation_date}")
+    print(f"Extracted UTC Offset: {str(meta.creation_date)[-6:]}")
     print(f"Modification Date: {meta.modification_date}")
     print(f"\nXMP Title: {xmeta.dc_title}")
     print(f"XMP Description: {xmeta.dc_description}")
