@@ -19,13 +19,19 @@ def CreateArgs():
     #dir flag
     parser.add_argument("-d", "--scandir", action="store_true", help="Whether to scan a directory (outputting to greppable file) or not.")
 
+    #skip content flag
+    parser.add_argument("-n", "--nocontent", action="store_true", help="When this flag is set, analyzing a pdf does not output its text content.")
+
     return parser
 
-def ScanDir(path, out="out.txt"):
+def ScanDir(path, out="out.txt", n=False):
     ''' Scan a directory for pdf analysis '''
     outF = open(out, "w")
     stdout = sys.stdout
     sys.stdout = outF
+    print(f"<==> Scanning {path} <==>")
+    print(f"OUTPUT PATH: {out}")
+    print(f"NO CONTENT: {n}\n")
 
     for f in os.scandir(path):
         if not f.is_file(): continue
@@ -39,13 +45,13 @@ def ScanDir(path, out="out.txt"):
 
         #read and analyze
         r = PdfReader(fname)
-        Analyzer(r)
+        Analyzer(r, n)
         print("--------------------------------")
 
     sys.stdout = stdout
     outF.close()
 
-def Analyzer(r):
+def Analyzer(r, n=False):
     ''' Analyze a PDF page '''
     page = r.pages[0]
 
@@ -53,7 +59,7 @@ def Analyzer(r):
 
     print("=== Overview ===")
     print(f"File Name: {sys.argv[1]}")
-    print("Content:\n"+page.extract_text())
+    if (not n): print("Content:\n"+page.extract_text())
 
     try:
         print("\n=== Metadata ===")
@@ -96,6 +102,7 @@ if __name__ == "__main__":
     outF = args.output
     analyze = args.analyze
     scandir = args.scandir
+    nocontent = args.nocontent
 
     #read pdf
     if (not scandir):
@@ -105,6 +112,6 @@ if __name__ == "__main__":
     if (not analyze):
         InjectPayload(page)
     elif (analyze and scandir):
-        ScanDir(f, outF)
+        ScanDir(f, outF, nocontent)
     else:
-        Analyzer(r)
+        Analyzer(r, nocontent)
