@@ -9,9 +9,10 @@ The `-n` or `--nocontent` flag will, when the analyze flag is used, the content 
 
 The `-d` or `--scandir` flag will instead require a directory to be passed as input, scanning it for pdf files, then analyzing them. The analysis will be outputted to the outfile.
 
+The `-p` or `--payload` flag will take a file path containing a JavaScript payload to insert. The default is a simple alert.
+
 Install with `pip install -r requirements.txt` and run `python3 main.py path/to/file.pdf`
 
 ## TODO
 
-- Custom payload support (involves deeper understanding of JS scripting)  
 - Better PDF analysis (e.g. extract any payloads)  

@@ -8,10 +8,13 @@ def CreateArgs():
     parser = argparse.ArgumentParser(description="A tool to analyze pdfs and create sample malware for testing purposes.")
 
     #input file
-    parser.add_argument("input", help="Input pdf to inject or analyze")
+    parser.add_argument("input", help="Input pdf to inject or analyze.")
 
     #output file
-    parser.add_argument("-o", "--output", type=str, default="./out.pdf", help="File name to output injected pdf")
+    parser.add_argument("-o", "--output", type=str, default="./out.pdf", help="File name to output injected pdf.")
+
+    #payload file
+    parser.add_argument("-p", "--payload", type=str, default=None, help="Optional file name for a specified payload.")
 
     #analyze flag
     parser.add_argument("-a", "--analyze", action="store_true", help="Flag that, when set, analyzes the input pdf instead of injecting it.")
@@ -84,11 +87,11 @@ def Analyzer(r, n=False):
     except:
         print("\nNo XMP data found.")
 
-def InjectPayload(page):
+def InjectPayload(page, payload):
     out = PdfWriter()
     out.metadata = None
     out.add_page(page)
-    out.add_js("app.alert('You have been pwned. Enjoy this virus!', 3);")
+    out.add_js(payload)
 
     with open(outF, "wb") as file:
         out.write(file)
@@ -103,6 +106,14 @@ if __name__ == "__main__":
     analyze = args.analyze
     scandir = args.scandir
     nocontent = args.nocontent
+    #obtain payload
+    payloadF = args.payload
+    try:
+        with open(payloadF, "r") as js:
+            payload = js.read()
+    except:
+        print("Failed to open payload file.")
+        payload="app.alert('You have been pwned. Enjoy this virus!', 3);"
 
     #read pdf
     if (not scandir):
@@ -110,7 +121,8 @@ if __name__ == "__main__":
         page = r.pages[0]
 
     if (not analyze):
-        InjectPayload(page)
+        InjectPayload(page, payload)
+        print(f"Injected payload to file {outF}")
     elif (analyze and scandir):
         ScanDir(f, outF, nocontent)
     else:
