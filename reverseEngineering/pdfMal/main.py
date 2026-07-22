@@ -1,6 +1,7 @@
 #!/bin/python3
 
 import sys
+import argparse
 from pypdf import PdfReader, PdfWriter
 
 if __name__ == "__main__":
