@@ -1,6 +1,6 @@
 #!/bin/python3
 
-import sys
+import sys, os
 import argparse
 from pypdf import PdfReader, PdfWriter
 
@@ -16,30 +16,59 @@ def CreateArgs():
     #analyze flag
     parser.add_argument("-a", "--analyze", action="store_true", help="Flag that, when set, analyzes the input pdf instead of injecting it.")
 
+    #dir flag
+    parser.add_argument("-d", "--scandir", action="store_true", help="Whether to scan a directory (outputting to greppable file) or not.")
+
     return parser
 
-def Analyzer(reader):
+def ScanDir(path, out="out.txt"):
+    ''' Scan a directory for pdf analysis '''
+    outF = open(out, "w")
+    stdout = sys.stdout
+    sys.stdout = outF
+
+    for f in os.scandir(path):
+        if not f.is_file(): continue
+        #obtain file name
+        fname = os.path.basename(f.name)
+        fname = f"{path}/{fname}"
+
+        #skip if not pdf
+        if fname[-3:].lower() != "pdf": continue
+        print(fname)
+
+        #read and analyze
+        r = PdfReader(fname)
+        Analyzer(r)
+        print("--------------------------------")
+
+    sys.stdout = stdout
+    outF.close()
+
+def Analyzer(r):
     ''' Analyze a PDF page '''
     page = r.pages[0]
 
     meta = r.metadata
-    xmeta = r.xmp_metadata
 
     print("=== Overview ===")
     print(f"File Name: {sys.argv[1]}")
     print("Content:\n"+page.extract_text())
 
-
-    print("\n=== Metadata ===")
-    print(f"Title: {meta.title}")
-    print(f"Author: {meta.author}")
-    print(f"Subject: {meta.subject}")
-    print(f"Creator: {meta.creator}")
-    print(f"Producer: {meta.producer}")
-    print(f"Creation Date: {meta.creation_date}")
-    print(f"Extracted UTC Offset: {str(meta.creation_date)[-6:]}")
-    print(f"Modification Date: {meta.modification_date}")
     try:
+        print("\n=== Metadata ===")
+        print(f"Title: {meta.title}")
+        print(f"Author: {meta.author}")
+        print(f"Subject: {meta.subject}")
+        print(f"Creator: {meta.creator}")
+        print(f"Producer: {meta.producer}")
+        print(f"Creation Date: {meta.creation_date}")
+        print(f"Extracted UTC Offset: {str(meta.creation_date)[-6:]}")
+        print(f"Modification Date: {meta.modification_date}")
+    except:
+        print("\nFailed to extract metadata.")
+    try:
+        xmeta = r.xmp_metadata
         print(f"\nXMP Title: {xmeta.dc_title}")
         print(f"XMP Description: {xmeta.dc_description}")
         print(f"XMP Date: {xmeta.xmp_create_date}")
@@ -66,12 +95,16 @@ if __name__ == "__main__":
     f = str(args.input)
     outF = args.output
     analyze = args.analyze
+    scandir = args.scandir
 
     #read pdf
-    r = PdfReader(f)
-    page = r.pages[0]
+    if (not scandir):
+        r = PdfReader(f)
+        page = r.pages[0]
 
     if (not analyze):
         InjectPayload(page)
+    elif (analyze and scandir):
+        ScanDir(f, outF)
     else:
         Analyzer(r)
