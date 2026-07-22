@@ -9,7 +9,7 @@ The `-n` or `--nocontent` flag will, when the analyze flag is used, the content 
 
 The `-d` or `--scandir` flag will instead require a directory to be passed as input, scanning it for pdf files, then analyzing them. The analysis will be outputted to the outfile.
 
-Install with `python3 -r requirements.txt` and run `python3 main.py path/to/file.pdf`
+Install with `pip install -r requirements.txt` and run `python3 main.py path/to/file.pdf`
 
 ## TODO
 
