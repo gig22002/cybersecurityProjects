@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     if (not analyze):
         InjectPayload(page, payload)
-        print(f"Injected payload to file {outF}")
+        print(f"Injected payload {payload} to file {outF}")
     elif (analyze and scandir):
         ScanDir(f, outF, nocontent)
     else:
