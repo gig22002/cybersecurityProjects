@@ -10,4 +10,4 @@ Create a `groupNames.txt` file (in the same directory as the script) with the de
 
 Note that the script creates the temporary `raw.txt` and `out.txt` files, containing the raw output of the script's `Get-ADGroupMember` pipeline and the results filtered to only contain student worker emails respectively. If these files are desired, simply comment out the `Remove-Item` commands for them.
 
-##### Created by Gio Girasoli 8/14/26 for ITS
+###### Created by Gio Girasoli 8/14/26 for ITS
