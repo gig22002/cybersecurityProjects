@@ -1,0 +1,5 @@
+#ignore internal text files
+*.txt
+
+#ignore outputted csvs
+*.csv
