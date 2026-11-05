@@ -15,10 +15,11 @@ def TestSR():
     for s in unans:
         print("%d is filtered" % s[TCP].dport)
 
-def Test(target="statlocker.gg"):
+def TestFrag(target="statlocker.gg"):
     """ Test sending fragmented packets """
     #craft packet
-    pkt = IP(dst=target)/TCP(dport=[53,80,443], flags="S")/Raw(RandString(size=42))
+    pkt = IP(dst=target)/TCP(dport=[80,443], flags="S")#/Raw(RandString(size=42))
+    pkt = IP(dst=target)/ICMP()/Raw(RandString(size=67))
 
     #create async sniffer
     t = AsyncSniffer(filter=f"host {target}")
@@ -28,12 +29,31 @@ def Test(target="statlocker.gg"):
     frags = fragment(pkt, fragsize=8)
     for f in frags:
         send(f)
-    time.sleep(2) #wait for responses
+    time.sleep(5) #wait for responses
     
     #stop sniffing and read packets
     pkts = t.stop()
     for p in pkts:
-        print(p.flags)
+        print(p.show())
+
+def TestIPID(target="statlocker.gg"):
+    """ Test probing IP ID """
+    #craft packet
+    pkt = IP(dst=target)/ICMP()
+
+    #create async sniffer
+    t = AsyncSniffer(filter=f"src host {target}")
+    t.start()
+
+    #send packets x times
+    for x in range(5):
+        send(pkt)
+    time.sleep(2) #wait for responses
+
+    #stop sniffing and read pkts
+    pkts = t.stop()
+    for p in pkts:
+        print(p.id)
 
 if __name__ == "__main__":
-    Test()
+    TestIPID()
