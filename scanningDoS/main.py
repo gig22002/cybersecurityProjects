@@ -3,7 +3,9 @@ from scapy.all import *
 
 def Test():
     pkt = IP(dst="statlocker.gg")/ICMP()/"XXXXXXXXXXX"
-    sr1(pkt)
+    a = sr1(pkt)
+
+    a.show()
 
 if __name__ == "__main__":
     Test()
