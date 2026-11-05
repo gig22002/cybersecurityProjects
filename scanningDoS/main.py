@@ -18,9 +18,11 @@ def ICMPScan(target):
     time.sleep(.4)
     pkts = t.stop()
 
-    #review ans
-    for p in pkts:
-        print(p.id)
+    #analyze ids
+    if (pkts[1].id == pkts[0].id):
+        print("IP ID is constant",pkts[0].id)
+    elif (pkts[1].id - pkts[0].id < 10):
+        print("Incrementing IP ID")
 
 if __name__ == "__main__":
     #get target from user input
