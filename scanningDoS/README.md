@@ -1,3 +1,5 @@
 # DoS / Scanning projects
 
-## Based on CSE 4402
+## Usage
+
+`python3 main.py path/to/websitelist.txt`
