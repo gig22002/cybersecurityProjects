@@ -19,7 +19,7 @@ def TestSR():
 def TestFrag(target="statlocker.gg"):
     """ Test sending fragmented packets """
     #craft packet
-    pkt = IP(dst=target)/TCP(dport=[80,443], flags="S")#/Raw(RandString(size=42))
+    pkt = IP(dst=target)/TCP(dport=[80,443], flags="FPU")#/Raw(RandString(size=42))
     #pkt = IP(dst=target)/ICMP()/Raw(RandString(size=67))
 
     #create async sniffer
@@ -30,7 +30,7 @@ def TestFrag(target="statlocker.gg"):
     frags = fragment(pkt, fragsize=8)
     for f in frags:
         send(f)
-    time.sleep(.4) #wait for responses
+    time.sleep(3) #wait for responses
     
     #stop sniffing and read packets
     pkts = t.stop()
@@ -46,13 +46,17 @@ def TestIPIDTCP(target="statlocker.gg"):
     t.start()
 
     #send packets x times
-    for x in range(3):
-        send(pkt)
+    send(pkt, count=3)
     time.sleep(1)
 
     pkts = t.stop()
     for p in pkts:
         print(p.id)
+
+def TestClosedTCP(target="statlocker.gg"):
+    pkt = IP(dst=target)/TCP(dport=[2], flags="S")
+
+    a,unans = sr(pkt, timeout=3)
 
 def TestIPIDICMP(target="statlocker.gg"):
     """ Test probing IP ID """
@@ -64,9 +68,8 @@ def TestIPIDICMP(target="statlocker.gg"):
     t.start()
 
     #send packets x times
-    for x in range(2):
-        send(pkt)
-    time.sleep(0.4) #wait for responses
+    send(pkt, count=3)
+    time.sleep(0.67) #wait for responses
 
     #stop sniffing and read pkts
     pkts = t.stop()
@@ -77,6 +80,7 @@ if __name__ == "__main__":
     if(len(sys.argv) >= 2):
         target = str(sys.argv[1])
     else: target="statlocker.gg"
-    TestFrag(target)
-    TestIPIDTCP(target)
-    TestIPIDICMP(target)
+    #TestFrag(target)
+    #TestIPIDTCP(target)
+    #TestIPIDICMP(target)
+    TestClosedTCP(target)
