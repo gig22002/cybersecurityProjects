@@ -24,7 +24,7 @@ def ICMPScan(target, count=2, debug=False):
         inc = True #incremental? diff b/w ids is never more than 10
         const = False #constant? diff b/w ids is 0
         rand = False #random? diff b/w ids is greater than 20000
-        randPos = False
+        randPos = False #random positive increments? diff b/w ids is <20000, >1000
         for i in range(len(pkts)-1):
             if debug: print(pkts[i].id)
             if (pkts[i+1].id - pkts[i].id > 10):
@@ -41,6 +41,7 @@ def ICMPScan(target, count=2, debug=False):
                 inc = False
                 randPos = True
 
+        #print out results
         print(f"{target} IP ID", end="")
         if const:
             print(f" is constant {pkts[0].id}")
@@ -61,6 +62,7 @@ if __name__ == "__main__":
         path = sys.argv[1]
     else: sys.exit("ERROR: Requires text file of addresses to enumerate.")
 
+    #multithreaded enumeration from txt file
     with open(path, "r") as f:
         processes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=16) as e:
