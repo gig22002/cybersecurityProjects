@@ -21,6 +21,7 @@ def ICMPScan(target, count=2, debug=False):
         pkts = t.stop()
 
         #analyze ids
+        #based on nmap's criteria: https://nmap.org/book/osdetect-methods.html#osdetect-ti
         inc = True #incremental? diff b/w ids is never more than 10
         const = False #constant? diff b/w ids is 0
         rand = False #random? diff b/w ids is greater than 20000
