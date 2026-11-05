@@ -14,7 +14,7 @@ def ICMPScan(target, count=2, debug=False):
         t.start()
 
         #send ping
-        send(pkt, count=count)
+        send(pkt, count=count, verbose=False)
 
         #wait and stop sniffer
         time.sleep(.2*count)
@@ -41,16 +41,17 @@ def ICMPScan(target, count=2, debug=False):
                 inc = False
                 randPos = True
 
+        print(f"{target} IP ID", end="")
         if const:
-            print("IP ID is constant",pkts[0].id)
+            print(f" is constant {pkts[0].id}")
         elif rand:
-            print("IP ID is random")
+            print(" is random")
         elif randPos:
-            print("IP ID is random positive increments")
+            print(f" is random positive increments")
         elif inc:
-            print("Incrementing IP ID")
+            print(f" is incrementing")
         else:
-            print("IP ID sequence is indeterminate")
+            print(f" sequence is indeterminate")
     except:
         print(f"Target {target} failed")
 
@@ -64,4 +65,4 @@ if __name__ == "__main__":
         processes = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=16) as e:
             for l in f:
-                ICMPScan(l.strip(), 5)
+                processes.append(e.submit(ICMPScan, l.strip(), 5))
