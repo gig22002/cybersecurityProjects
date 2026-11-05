@@ -1,7 +1,7 @@
 """ Program to scan IPs and detect what IP ID they use """
 from scapy.all import *
 
-def Test():
+def TestSR():
     pkt = IP(dst="statlocker.gg")/TCP(dport=[53,80,443], flags="S")
     ans, unans = sr(pkt, timeout=3)
 
@@ -11,6 +11,10 @@ def Test():
 
     for s in unans:
         print("%d is filtered" % s[TCP].dport)
+
+def Test():
+    pkt = IP(dst="statlocker.gg")/TCP(dport=[53,80,443], flags="S")
+    send(fragment(pkt))
 
 if __name__ == "__main__":
     Test()
