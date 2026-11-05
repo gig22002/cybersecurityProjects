@@ -1,4 +1,5 @@
 """ Program to scan IPs and detect what IP ID they use """
+import sys
 from scapy.all import *
 
 def TestSR():
@@ -19,24 +20,41 @@ def TestFrag(target="statlocker.gg"):
     """ Test sending fragmented packets """
     #craft packet
     pkt = IP(dst=target)/TCP(dport=[80,443], flags="S")#/Raw(RandString(size=42))
-    pkt = IP(dst=target)/ICMP()/Raw(RandString(size=67))
+    #pkt = IP(dst=target)/ICMP()/Raw(RandString(size=67))
 
     #create async sniffer
-    t = AsyncSniffer(filter=f"host {target}")
+    t = AsyncSniffer(filter=f"src host {target}")
     t.start()
 
     #fragment and send packet
     frags = fragment(pkt, fragsize=8)
     for f in frags:
         send(f)
-    time.sleep(5) #wait for responses
+    time.sleep(.4) #wait for responses
     
     #stop sniffing and read packets
     pkts = t.stop()
     for p in pkts:
         print(p.show())
 
-def TestIPID(target="statlocker.gg"):
+def TestIPIDTCP(target="statlocker.gg"):
+    #craft packet
+    pkt = IP(dst=target)/TCP(dport=[22,80,443], flags="S")
+
+    #create async sniffer
+    t = AsyncSniffer(filter=f"src host {target}")
+    t.start()
+
+    #send packets x times
+    for x in range(3):
+        send(pkt)
+    time.sleep(1)
+
+    pkts = t.stop()
+    for p in pkts:
+        print(p.id)
+
+def TestIPIDICMP(target="statlocker.gg"):
     """ Test probing IP ID """
     #craft packet
     pkt = IP(dst=target)/ICMP()
@@ -46,9 +64,9 @@ def TestIPID(target="statlocker.gg"):
     t.start()
 
     #send packets x times
-    for x in range(5):
+    for x in range(2):
         send(pkt)
-    time.sleep(2) #wait for responses
+    time.sleep(0.4) #wait for responses
 
     #stop sniffing and read pkts
     pkts = t.stop()
@@ -56,4 +74,9 @@ def TestIPID(target="statlocker.gg"):
         print(p.id)
 
 if __name__ == "__main__":
-    TestIPID()
+    if(len(sys.argv) >= 2):
+        target = str(sys.argv[1])
+    else: target="statlocker.gg"
+    TestFrag(target)
+    TestIPIDTCP(target)
+    TestIPIDICMP(target)
