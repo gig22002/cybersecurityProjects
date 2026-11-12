@@ -1,11 +1,15 @@
 """ Program using dig to detect DNSSEC use of resolvers """
-import sys
 import re
+import argparse
 import subprocess
 
 def Dig(resolver):
     #dig with +dnssec flag on known dnssec domain (cloudflare) w/ specified resolver
-    out = subprocess.check_output(["dig", "A", "cloudflare.com", "+dnssec", f"@{resolver}"]).decode("utf-8")
+    try:
+        out = subprocess.check_output(["dig", "A", "cloudflare.com", "+dnssec", f"@{resolver}"]).decode("utf-8")
+    except:
+        #failed to dig
+        return 0
     #grab flags and check if "ad" flag is present
     flags = re.search("\\bflags:\\s(.*);", out).group()
     ad = "ad" in str(flags)
@@ -13,9 +17,33 @@ def Dig(resolver):
     print(flags)
     print(ad)
 
-if __name__ == "__main__":
-    if len(sys.argv) >= 2:
-        res = sys.argv[1]
-    else: res = "1.1.1.1"
+def CreateArgs():
+    """ Helper function to create argument parser """
+    #create parser
+    parser = argparse.ArgumentParser(description = "A tool for testing DNSSEC validation of resolvers.")
 
-    Dig(res)
+    #input
+    parser.add_argument("input", help="A text file of resolvers or a single resolver (IP format)")
+
+    #single target? (i.e. not text file)
+    parser.add_argument("-s", "--single", action="store_true", help="If the input is a single resolver")
+
+    return parser
+
+if __name__ == "__main__":
+    #parse arguments
+    parser = CreateArgs()
+    args = parser.parse_args()
+    
+    #get input
+    inp = str(args.input)
+
+    #if single
+    if (args.single):
+        Dig(inp)
+        sys.exit()
+
+    #if file
+    with open(inp, "r") as f:
+        for ip in f:
+            Dig(ip.strip())
