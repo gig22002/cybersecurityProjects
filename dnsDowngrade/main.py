@@ -3,6 +3,7 @@ import re
 import sys
 import argparse
 import subprocess
+import concurrent.futures
 
 def Dig(resolver):
     #dig with +dnssec flag on known dnssec domain (cloudflare) w/ specified resolver
@@ -10,7 +11,7 @@ def Dig(resolver):
         out = subprocess.check_output(["dig", "A", "cloudflare.com", "+dnssec", f"@{resolver}"]).decode("utf-8")
     except:
         #failed to dig
-        return 0
+        return resolver, False
     #grab flags and check if "ad" flag is present
     flags = re.search("\\bflags:\\s(.*);", out).group()
     ad = "ad" in str(flags)
@@ -48,10 +49,20 @@ if __name__ == "__main__":
         sys.exit()
 
     #if file
-    resolvers = dict()
-    with open(inp, "r") as f:
-        for ip in f:
-            res, ad = Dig(ip.strip())
-            resolvers[res] = ad
+    resolvers = dict() #initialize dict
+    #multithread from file
+    processes = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as e:
+        with open(inp, "r") as f:
+            for ip in f:
+                processes.append(e.submit(Dig, ip.strip()))
+
+        #collect results
+        for thread in concurrent.futures.as_completed(processes):
+            try:
+                res, ans = thread.result()
+                resolvers[res] = ans
+            except Exception as ex:
+                print(f"Encountered exception {ex}")
 
     print(resolvers)
