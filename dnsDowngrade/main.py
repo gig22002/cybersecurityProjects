@@ -1,5 +1,6 @@
 """ Program using dig to detect DNSSEC use of resolvers """
 import re
+import sys
 import argparse
 import subprocess
 
