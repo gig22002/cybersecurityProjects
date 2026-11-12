@@ -57,8 +57,6 @@ if __name__ == "__main__":
             #submit thread for each ip in txt
             for ip in f:
                 processes.append(e.submit(Dig, ip.strip()))
-        #sanity notif
-        print("Awaiting all threads...")
 
         #collect results
         for thread in concurrent.futures.as_completed(processes):
