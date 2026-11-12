@@ -15,8 +15,11 @@ def Dig(resolver):
     flags = re.search("\\bflags:\\s(.*);", out).group()
     ad = "ad" in str(flags)
 
-    print(flags)
-    print(ad)
+    #format result
+    if (ad):
+        print(f"Resolver {resolver} supports DNSSEC")
+
+    return resolver, ad
 
 def CreateArgs():
     """ Helper function to create argument parser """
@@ -45,6 +48,10 @@ if __name__ == "__main__":
         sys.exit()
 
     #if file
+    resolvers = dict()
     with open(inp, "r") as f:
         for ip in f:
-            Dig(ip.strip())
+            res, ad = Dig(ip.strip())
+            resolvers[res] = ad
+
+    print(resolvers)
