@@ -4,10 +4,14 @@ import re
 import subprocess
 
 def Dig(resolver):
+    #dig with +dnssec flag on known dnssec domain (cloudflare) w/ specified resolver
     out = subprocess.check_output(["dig", "A", "cloudflare.com", "+dnssec", f"@{resolver}"]).decode("utf-8")
-    x = re.search("\\bflags:\\s(.*);", out).group()
+    #grab flags and check if "ad" flag is present
+    flags = re.search("\\bflags:\\s(.*);", out).group()
+    ad = "ad" in str(flags)
 
-    print(x)
+    print(flags)
+    print(ad)
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
