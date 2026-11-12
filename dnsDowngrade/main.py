@@ -52,10 +52,13 @@ if __name__ == "__main__":
     resolvers = dict() #initialize dict
     #multithread from file
     processes = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as e:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as e:
         with open(inp, "r") as f:
+            #submit thread for each ip in txt
             for ip in f:
                 processes.append(e.submit(Dig, ip.strip()))
+        #sanity notif
+        print("Awaiting all threads...")
 
         #collect results
         for thread in concurrent.futures.as_completed(processes):
