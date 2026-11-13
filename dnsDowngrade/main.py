@@ -1,6 +1,6 @@
 """ Program using dig to detect DNSSEC use of resolvers """
 import re
-import sys
+import sys, csv
 import argparse
 import subprocess
 import concurrent.futures
@@ -66,4 +66,6 @@ if __name__ == "__main__":
             except Exception as ex:
                 print(f"Encountered exception {ex}")
 
-    print(resolvers)
+    with open("out.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerows(resolvers.items())
