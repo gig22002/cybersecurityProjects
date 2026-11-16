@@ -50,6 +50,7 @@ if __name__ == "__main__":
 
     #if file
     resolvers = dict() #initialize dict
+    #dnsResolvers = [] #store only dnssec resolvers
     #multithread from file
     processes = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=12) as e:
@@ -63,6 +64,8 @@ if __name__ == "__main__":
             try:
                 res, ans = thread.result()
                 resolvers[res] = ans
+                #if ans:
+                    #dnsResolvers.append(res)
             except Exception as ex:
                 print(f"Encountered exception {ex}")
 
