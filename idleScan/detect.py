@@ -1,26 +1,28 @@
 """ Program to attempt to detect globally-incrementing IP-ID hosts """
 import sys
+import json
+import concurrent.futures
 from scapy.all import *
 
 def SendSynAck(host, prt=80):
     """ Send and receive a syn/ack pkt (requires root) """
     pkt = IP(dst=host)/TCP(dport=prt, flags="SA")
     
-    t = AsyncSniffer(filter=f"src host {host}")
-    t.start()
+    ans, unans = sr(pkt, timeout=5)
 
-    send(pkt, count=3, verbose=True)
-
-    time.sleep(3)
-    pkts = t.stop()
-
-    for p in pkts:
-        print(p.id)
+    ans.summary()
 
 if __name__ == "__main__":
-    #get target host (placeholder)
+    #get target file
     if (len(sys.argv) >= 2):
-        host = sys.argv[1]
-    else: host = "8.8.8.8"
+        path = sys.argv[1]
+    else: sys.exit("Error: requires json file path")
 
-    SendSynAck(host, 3389)
+    hosts = []
+    with open(path, "r") as f:
+        for l in f:
+            hosts.append(json.loads(l))
+
+    for item in hosts:
+        ip = hosts[0]["http"]["host"]
+        SendSynAck(ip, 80)
