@@ -7,7 +7,7 @@ from scapy.all import *
 def SendSynAck(host, prt=80):
     """ Send and receive a syn/ack pkt (requires root) """
     print(f"Scanning {host}...")
-    pkt = IP(dst=host)/TCP(dport=prt, flags="SA")
+    pkt = IP(dst=host)/TCP(dport=prt, flags="A")
     
     t = AsyncSniffer(filter=f"src host {host}")
     t.start()
@@ -38,4 +38,4 @@ if __name__ == "__main__":
     with concurrent.futures.ThreadPoolExecutor(max_workers = 12) as e:
         for item in hosts:
             ip = item["http"]["host"]
-            processes.append(e.submit(SendSynAck, ip, 80))
+            processes.append(e.submit(SendSynAck, ip, (20,443)))
